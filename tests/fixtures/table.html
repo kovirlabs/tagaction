@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+<title>Table</title>
+</head>
+<body>
+<main>
+  <h1>Orders</h1>
+  <search><input type="search" aria-label="Filter orders" aria-controls="orders"></search>
+  <table id="orders">
+    <thead><tr><th>Customer</th><th>Total</th><th>Date</th><th data-tagaction="off">Actions</th></tr></thead>
+    <tbody>
+      <tr><td>Maya Lin</td><td><data value="1200">$1.2k</data></td><td><time datetime="2026-03-02">Mar 2</time></td><td><button>Edit</button></td></tr>
+      <tr><td>alex Chen</td><td><data value="95">$95</data></td><td><time datetime="2026-11-20">Nov 20</time></td><td><button>Edit</button></td></tr>
+      <tr><td>Zoë Park</td><td><data value="310.5">$310.50</data></td><td><time datetime="2025-12-31">Dec 31</time></td><td><button>Edit</button></td></tr>
+      <tr><td>Bo Ito</td><td><data value="18">$18</data></td><td><time datetime="2026-07-04">Jul 4</time></td><td><button>Edit</button></td></tr>
+    </tbody>
+  </table>
+  <table id="numbers">
+    <thead><tr><th>Item</th><th>Count</th></tr></thead>
+    <tbody><tr><td>b</td><td>1,200</td></tr><tr><td>a</td><td>900</td></tr><tr><td>c</td><td>15</td></tr></tbody>
+  </table>
+  <input type="search" aria-label="Filter fruit" aria-controls="fruit" hidden>
+  <ul id="fruit"><li>Apple pie</li><li>Banana bread</li><li>Cherry tart</li></ul>
+  <table id="one-row"><thead><tr><th>Only</th></tr></thead><tbody><tr><td>One row</td></tr></tbody></table>
+</main>
+</body>
+</html>

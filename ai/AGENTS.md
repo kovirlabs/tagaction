@@ -1,0 +1,57 @@
+<!-- Generated from llms.txt by scripts/build.mjs. Do not edit directly. -->
+
+## TagAction
+
+> A tiny script that makes plain, semantic HTML behave the way people expect: sortable tables, copy buttons on code, show/hide on password fields, dialogs that open from a button, dropdown menus, live totals. No classes, no build step, no page script, no new syntax. Write standard HTML elements and attributes; TagAction finds them. Every page still works with JavaScript off.
+
+Add this to `<head>` (with or without TagBrush.css, which it is designed to sit beside):
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+```
+
+### Rules for writing pages
+
+- Write the HTML you would write anyway. TagAction adds behavior to native elements and ARIA attributes; there is nothing to call and no classes to add.
+- Do not write JavaScript for the behaviors below. Do not add `onclick` handlers, IDs for scripts, or framework attributes for them.
+- Keep pages usable without JavaScript. A control that only works with TagAction (a filter box with no form, an "Add row" button) may carry `hidden`; TagAction shows it.
+- Turn TagAction off for an element and everything inside it with `data-tagaction="off"`.
+- Content added later (htmx swaps, page scripts) is enhanced automatically. To enhance content yourself, call `TagAction.init(element)`.
+
+### Automatic behaviors (no attributes needed)
+
+- Dialogs: a modal `<dialog>` closes when you click its backdrop. Add `closedby="closerequest"` to keep it open. Open one from a button with the browser's own attributes: `<button commandfor="confirm" command="show-modal">Delete</button><dialog id="confirm"><form method="dialog"><p>Delete this file?</p><button value="cancel">Cancel</button><button value="ok">Delete</button></form></dialog>`. Close from inside with `command="close"`.
+- Tables: every `<table>` with a `<thead>` and two or more body rows sorts when you click a column header, and sets `aria-sort`. Numbers sort as numbers. Put the sort value in `<data value="1200">$1.2k</data>` or `<time datetime="2026-11-06">` when the shown text would sort wrong. `data-tagaction="off"` on a `<th>` keeps that column unsortable.
+- Forms: validation messages (from `required`, `type="email"`, `pattern`, `minlength`, …) appear as text under the field instead of a bubble, and `aria-invalid` is set. A `<small>` right after the field is used for the message, and its help text comes back once the field is fixed. The submit button is disabled with `aria-busy="true"` while the form is sent. A `method="post"` form with unsent changes warns before you leave the page.
+- `<textarea>` without `rows` grows as you type. With `maxlength`, a counter shows how many characters are used: `<textarea maxlength="280"></textarea>`.
+- `<input type="file" multiple>` lists the chosen file names. Files can be dropped onto any file input or its `<label>`.
+- `<input type="password">` gets a Show/Hide button.
+- `<pre>` gets a Copy button.
+- `<time datetime="2026-11-06T17:00Z">Nov 6, 5 PM UTC</time>`: a time with a timezone is shown in the reader's own timezone and language.
+- `<nav>`: the link to the current page gets `aria-current="page"` (unless one is already marked). In a nav whose links all point to sections of the page, the link to the section on screen gets `aria-current="true"` as you scroll.
+- `<h2>` and `<h3>` with an `id` get a "#" link to the section.
+- Images: a link around an image that points to an image file opens it in a viewer instead of a new page: `<a href="photo-large.jpg"><img src="photo.jpg" alt="Harbor at dusk"></a>`. An image in a `<figure>` shown smaller than its real size opens in the viewer when clicked.
+- `<abbr title="HyperText Markup Language">HTML</abbr>`: tapping it shows the title in brackets, for touch screens.
+- `<menu>` and popover menus (`<div popover><nav><ul>…</ul></nav></div>`): arrow keys, Home, and End move between the items.
+
+### Behaviors you switch on with HTML
+
+- Accordion, one open at a time: give neighboring `<details>` the same `name`: `<details name="faq"><summary>Question</summary><p>Answer</p></details>`.
+- Remember which `<details>` are open across visits: `data-tag-remember` on a `<details>` with an `id`, or on an element containing them: `<section data-tag-remember><details id="setup"><summary>Setup</summary><p>…</p></details></section>`.
+- Filter a table or list as you type: `<input type="search" aria-label="Filter orders" aria-controls="orders">` with `<table id="orders">`. Rows (or `<li>`s of a list) that don't contain every typed word are hidden.
+- Dropdown: `<button aria-expanded="false" aria-controls="account-menu">Account</button><ul id="account-menu"><li><a href="/profile">Profile</a></li><li><a href="/logout">Sign out</a></li></ul>`. Write the list visible; TagAction hides it until the button is pressed. Escape and clicking outside close it; arrow keys move through it.
+- Relative time: `<time datetime="2026-11-06T17:00Z" data-tag-time="relative">Nov 6, 2026</time>` shows "3 hours ago" and keeps it up to date. The full date is in its `title`.
+- Table of contents: an empty `<nav data-tag-toc></nav>` (for example in an `<aside>` beside the `<article>`) is filled with links to the `<h2>` and `<h3>` headings in `<main>`. Headings without an `id` get one.
+- Live result: `<output for="nights rate">` shows the sum of the numbers in the fields with those ids, or the value of a single field: `<input type="range" id="volume" min="0" max="10"><output for="volume"></output>`. A checkbox or radio counts its value only while checked.
+- Repeated rows: put a `<template>` where new items should go, and point a button at it with `command="--clone"`: `<ul><li><input aria-label="Guest name" name="guest"></li><template id="guest"><li><input aria-label="Guest name" name="guest"></li></template></ul><button type="button" commandfor="guest" command="--clone" hidden>Add guest</button>`. Ids inside each copy get a number so they stay unique.
+
+### What TagAction does not do
+
+- No fetching or swapping HTML from a server (use htmx, which TagAction works with), no client-side includes, no templating syntax, no reactive state, no components.
+- It does not replace native `<details>`, `<dialog>`, or `popover` behavior, and lazy loading is the browser's own `loading="lazy"`.
+- It does not style the page. TagBrush.css does that; TagAction only adds small styles for the buttons and text it inserts.
+
+### Links
+
+- [README](https://github.com/kovirlabs/tagaction#readme): full documentation
+- [TagBrush.css](https://github.com/kovirlabs/tagbrush): classless CSS for the same HTML

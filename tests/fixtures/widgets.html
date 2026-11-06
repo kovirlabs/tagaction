@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+<title>Widgets</title>
+</head>
+<body>
+<main>
+  <h1>Widgets</h1>
+  <pre><code>npm install tagaction</code></pre>
+  <p>Posted <time id="zoned" datetime="2026-11-06T17:00Z">Nov 6, 5 PM UTC</time>, updated <time id="relative" datetime="2026-11-06T14:00Z" data-tag-time="relative">Nov 6, 2026</time>, due <time id="date-only" datetime="2026-12-01">December 1</time>.</p>
+  <p>Written in <abbr title="HyperText Markup Language">HTML</abbr>.</p>
+  <form>
+    <label for="volume">Volume</label>
+    <input type="range" id="volume" min="0" max="10" value="4">
+    <output id="volume-out" for="volume">4</output>
+    <label for="nights">Nights</label><input type="number" id="nights" value="2">
+    <label for="fee">Fee</label><input type="number" id="fee" value="15.5">
+    <label><input type="checkbox" id="breakfast" value="20"> Breakfast</label>
+    <p>Total: <output id="total" for="nights fee breakfast"></output></p>
+    <label for="notes">Notes</label>
+    <textarea id="notes"></textarea>
+  </form>
+  <ul id="guests">
+    <li><label for="guest">Guest</label><input id="guest" name="guest"></li>
+    <template id="new-guest"><li><label for="guest">Guest</label><input id="guest" name="guest"></li></template>
+  </ul>
+  <button type="button" commandfor="new-guest" command="--clone" hidden>Add guest</button>
+  <section data-tag-remember>
+    <details id="setup"><summary>Setup</summary><p>Install it.</p></details>
+  </section>
+  <details name="faq" id="q1"><summary>One</summary><p>First answer.</p></details>
+  <details name="faq" id="q2"><summary>Two</summary><p>Second answer.</p></details>
+  <figure><a href="photo.svg"><img src="photo.svg" alt="A big orange square" width="200" height="120"></a><figcaption>Linked photo</figcaption></figure>
+  <figure><img id="shrunk" src="photo.svg" alt="A shrunk photo" width="200" height="120"><figcaption>Shrunk photo</figcaption></figure>
+  <figure><img id="small" src="small.svg" alt="A small photo"><figcaption>Small photo</figcaption></figure>
+</main>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+<title>Menus</title>
+</head>
+<body>
+<header>
+  <nav><strong>Shop</strong>
+    <ul>
+      <li><button aria-expanded="false" aria-controls="account">Account</button>
+        <ul id="account"><li><a href="#profile">Profile</a></li><li><a href="#billing">Billing</a></li><li><a href="#logout">Sign out</a></li></ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <h1>Menus</h1>
+  <button popovertarget="more">More</button>
+  <div popover id="more"><nav aria-label="More"><ul><li><a href="#a">Alpha</a></li><li><a href="#b">Beta</a></li><li><a href="#c">Gamma</a></li></ul></nav></div>
+  <p><a href="#after">After the menus</a></p>
+</main>
+</body>
+</html>

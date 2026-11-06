@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+<title>Dialog</title>
+</head>
+<body>
+<main>
+  <h1>Dialogs</h1>
+  <button commandfor="confirm" command="show-modal">Delete file</button>
+  <dialog id="confirm">
+    <form method="dialog">
+      <header><h2>Delete file?</h2><button aria-label="Close">✕</button></header>
+      <p>This can't be undone. <input aria-label="Type the file name"></p>
+      <footer><button class="secondary" value="cancel">Cancel</button><button value="ok">Delete</button></footer>
+    </form>
+  </dialog>
+  <button commandfor="sticky" command="show-modal">Open sticky dialog</button>
+  <dialog id="sticky" closedby="closerequest"><p>Only Escape or the button closes me.</p><button commandfor="sticky" command="close">Close</button></dialog>
+  <div data-tagaction="off">
+    <button commandfor="off-dialog" command="show-modal">Open opted-out dialog</button>
+    <dialog id="off-dialog"><p>No backdrop closing.</p></dialog>
+  </div>
+</main>
+</body>
+</html>

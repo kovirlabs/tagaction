@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TagAction: plain HTML that behaves</title>
+<meta name="description" content="A tiny script that makes semantic HTML tags behave the way people expect. No classes, no build step, no page script.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="tagaction.min.js" defer></script>
+</head>
+<body>
+<header>
+  <nav>
+    <strong>TagAction</strong>
+    <ul>
+      <li><a href="index.html">Demo</a></li>
+      <li><a href="https://github.com/kovirlabs/tagaction">GitHub</a></li>
+      <li><button class="outline" aria-expanded="false" aria-controls="family">Family</button>
+        <ul id="family">
+          <li><a href="https://github.com/kovirlabs/tagbrush">TagBrush</a></li>
+          <li><a href="https://github.com/kovirlabs/tagcheck">TagCheck</a></li>
+          <li><a href="https://github.com/kovirlabs/tagkit">TagKit</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <hgroup>
+    <h1>Plain HTML that behaves</h1>
+    <p>One script tag. No classes, no framework, no page script. Every example below is plain HTML; view the source.</p>
+  </hgroup>
+</header>
+<main>
+  <aside><nav data-tag-toc></nav></aside>
+  <article>
+    <h2>Install</h2>
+    <p>Add one line to <code>&lt;head&gt;</code>. Copy it with the button.</p>
+    <pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer&gt;&lt;/script&gt;</code></pre>
+    <p>Released <time datetime="2026-11-06T17:00Z" data-tag-time="relative">November 6, 2026</time>. Times with a timezone, like <time datetime="2026-11-06T17:00Z">17:00 UTC</time>, show in your own. Tap <abbr title="Progressive enhancement">PE</abbr> on a phone to read it.</p>
+
+    <h2>Tables</h2>
+    <p>Click a column header to sort. Type to filter.</p>
+    <search><input type="search" aria-label="Filter orders" aria-controls="orders" placeholder="Filter orders…" hidden></search>
+    <table id="orders">
+      <thead><tr><th>Customer</th><th>Total</th><th>Placed</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Maya Lin</td><td><data value="1240">$1,240.00</data></td><td><time datetime="2026-11-02">Nov 2</time></td><td><mark data-tone="success">Paid</mark></td></tr>
+        <tr><td>Alex Chen</td><td><data value="95">$95.00</data></td><td><time datetime="2026-10-28">Oct 28</time></td><td><mark data-tone="warning">Pending</mark></td></tr>
+        <tr><td>Zoë Park</td><td><data value="310.5">$310.50</data></td><td><time datetime="2026-11-05">Nov 5</time></td><td><mark data-tone="success">Paid</mark></td></tr>
+        <tr><td>Bo Ito</td><td><data value="18">$18.00</data></td><td><time datetime="2026-09-14">Sep 14</time></td><td><mark data-tone="error">Refunded</mark></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Forms</h2>
+    <p>Submit with mistakes to see messages under the fields. Choose several files, or drop them on the label.</p>
+    <form action="https://example.com/signup" method="post">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+      <small>We never share it.</small>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required minlength="8">
+      <label for="bio">Short bio</label>
+      <textarea id="bio" name="bio" maxlength="160"></textarea>
+      <label for="files">Attachments</label>
+      <input type="file" id="files" name="files" multiple>
+      <label for="room">Room</label>
+      <select id="room" name="room"><option value="120">Standard ($120)</option><option value="180">Suite ($180)</option></select>
+      <label><input type="checkbox" id="breakfast" name="breakfast" value="15"> Breakfast ($15)</label>
+      <label><input type="checkbox" id="parking" name="parking" value="10"> Parking ($10)</label>
+      <p>Per night: $<output for="room breakfast parking"></output></p>
+      <h3>Guests</h3>
+      <ul>
+        <li><label for="guest">Guest name</label><input id="guest" name="guest"></li>
+        <template id="new-guest"><li><label for="guest">Guest name</label><input id="guest" name="guest"></li></template>
+      </ul>
+      <div role="group">
+        <button type="button" class="secondary" commandfor="new-guest" command="--clone" hidden>Add guest</button>
+        <button>Create account</button>
+      </div>
+    </form>
+
+    <h2>Dialogs and menus</h2>
+    <p>The button opens the dialog with no script. Click the backdrop to close it.</p>
+    <button commandfor="confirm" command="show-modal">Delete project</button>
+    <dialog id="confirm">
+      <form method="dialog">
+        <header><h3>Delete project?</h3><button aria-label="Close">✕</button></header>
+        <p>This removes every file. It can't be undone.</p>
+        <footer><button class="secondary" value="cancel">Cancel</button><button value="delete">Delete</button></footer>
+      </form>
+    </dialog>
+
+    <h2>Details</h2>
+    <p>These answers open one at a time, and the page remembers which one was open.</p>
+    <section data-tag-remember>
+      <details name="faq" id="faq-js"><summary>Does it work without JavaScript?</summary><p>Yes. Every page works plainly; TagAction only adds behavior.</p></details>
+      <details name="faq" id="faq-htmx"><summary>Does it work with htmx?</summary><p>Yes. Content swapped in later is enhanced automatically.</p></details>
+    </section>
+
+    <h2>Images</h2>
+    <figure>
+      <a href="https://picsum.photos/id/1015/1600/900.jpg"><img src="https://picsum.photos/id/1015/800/450.jpg" alt="A river between mountains" width="800" height="450" loading="lazy"></a>
+      <figcaption>Click to see it larger.</figcaption>
+    </figure>
+  </article>
+</main>
+<footer>
+  <p>TagAction is part of the Tag family by Kovir Labs. Apache-2.0.</p>
+</footer>
+</body>
+</html>

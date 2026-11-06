@@ -1,0 +1,49 @@
+{
+  "name": "tagaction",
+  "version": "0.1.0",
+  "description": "A tiny, no-build script that makes semantic HTML tags behave the way people expect: sortable tables, copy buttons on code, password toggles, dialogs that open from a button, and more. Companion to TagBrush.css.",
+  "keywords": [
+    "html",
+    "semantic-html",
+    "progressive-enhancement",
+    "classless",
+    "vanilla-js",
+    "no-build",
+    "htmx",
+    "accessible",
+    "llms-txt",
+    "ai-agents",
+    "tagbrush"
+  ],
+  "homepage": "https://github.com/kovirlabs/tagaction#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kovirlabs/tagaction.git"
+  },
+  "bugs": "https://github.com/kovirlabs/tagaction/issues",
+  "license": "Apache-2.0",
+  "browser": "tagaction.js",
+  "main": "tagaction.js",
+  "exports": {
+    ".": "./tagaction.js",
+    "./min": "./tagaction.min.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "tagaction.js",
+    "tagaction.min.js",
+    "llms.txt",
+    "ai/"
+  ],
+  "sideEffects": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "pretest": "node scripts/build.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "esbuild": "^0.28.2",
+    "tagbrush": "1.1.0"
+  }
+}

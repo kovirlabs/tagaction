@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+<title>Form</title>
+</head>
+<body>
+<main>
+  <article>
+    <h1>Sign up</h1>
+    <form id="signup" action="https://example.test/signup" method="post">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+      <small>We never share it.</small>
+      <label for="name">Name</label>
+      <input id="name" name="name" required minlength="2">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required minlength="8">
+      <small>At least 8 characters.</small>
+      <label><input type="checkbox" name="terms" required> I accept the terms</label>
+      <fieldset>
+        <legend>Plan</legend>
+        <label><input type="radio" name="plan" value="free" required> Free</label>
+        <label><input type="radio" name="plan" value="pro"> Pro</label>
+      </fieldset>
+      <label for="bio">Bio</label>
+      <textarea id="bio" name="bio" maxlength="40"></textarea>
+      <label for="docs">Documents</label>
+      <input type="file" id="docs" name="docs" multiple>
+      <button>Create account</button>
+    </form>
+    <form id="search" action="https://example.test/search" method="get"><input type="search" name="q" aria-label="Search"><button>Search</button></form>
+  </article>
+</main>
+</body>
+</html>
