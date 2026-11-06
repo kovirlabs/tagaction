@@ -8,4 +8,4 @@ First version. Tested with TagBrush.css 1.1.0.
 - A fallback for the `commandfor`/`command` attributes in browsers without them.
 - One `MutationObserver` enhances content added after load (htmx swaps, page scripts).
 - `data-tagaction="off"` opts an element out.
-- `llms.txt`, plus a Claude Code skill, a Cursor rule, and an AGENTS.md section generated from it.
+- `llms.txt`, linked to the Tag family guide, plus a Claude Code skill, a Cursor rule, and an AGENTS.md section generated from it.

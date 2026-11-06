@@ -58,5 +58,6 @@ Add this to `<head>` (with or without TagBrush.css, which it is designed to sit 
 
 ## Links
 
+- [The Tag family](https://kovirlabs.github.io/tagstack/llms.txt): how TagBrush.css, TagAction, and TagCheck fit together
 - [README](https://github.com/kovirlabs/tagaction#readme): full documentation
 - [TagBrush.css](https://github.com/kovirlabs/tagbrush): classless CSS for the same HTML
