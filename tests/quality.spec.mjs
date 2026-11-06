@@ -57,7 +57,8 @@ test.describe('llms.txt contract', () => {
     expect(snippets.length).toBeGreaterThan(10);
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+    // Example images in the snippets don't exist; only script errors count.
+    page.on('console', (message) => { if (message.type() === 'error' && !message.text().startsWith('Failed to load resource')) errors.push(message.text()); });
     await open(page, 'blank.html');
     const unchanged = await page.evaluate((snippets) => snippets.filter((html) => {
       const main = document.querySelector('main');
