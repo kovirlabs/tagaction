@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## Unreleased
+
+- Tested with TagBrush.css 1.2.0.
+
+## 0.1.0 (2026-11-06)
 
 First version. Tested with TagBrush.css 1.1.0.
 
