@@ -35,7 +35,7 @@ Add this to `<head>` (with or without TagBrush.css, which it is designed to sit 
 - `<time datetime="2026-11-06T17:00Z">Nov 6, 5 PM UTC</time>`: a time with a timezone is shown in the reader's own timezone and language.
 - `<nav>`: the link to the current page gets `aria-current="page"` (unless one is already marked). In a nav whose links all point to sections of the page, the link to the section on screen gets `aria-current="true"` as you scroll.
 - `<h2>` and `<h3>` with an `id` get a "#" link to the section.
-- Images: a link around an image that points to an image file opens it in a viewer instead of a new page: `<a href="photo-large.jpg"><img src="photo.jpg" alt="Harbor at dusk"></a>`. An image in a `<figure>` shown smaller than its real size opens in the viewer when clicked.
+- Images: a link around an image that points to an image file (a URL ending in `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.gif`, or `.svg`) opens it in a viewer instead of a new page: `<a href="photo-large.jpg"><img src="photo.jpg" alt="Harbor at dusk"></a>`. An image in a `<figure>` shown smaller than its real size opens in the viewer when clicked.
 - `<abbr title="HyperText Markup Language">HTML</abbr>`: tapping it shows the title in brackets, for touch screens.
 - `<menu>` and popover menus (`<div popover><nav><ul>…</ul></nav></div>`): arrow keys, Home, and End move between the items.
 
