@@ -5,21 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TagAction: plain HTML that behaves</title>
 <meta name="description" content="A tiny script that makes semantic HTML tags behave the way people expect. No classes, no build step, no page script.">
+<link rel="icon" href="https://kovirlabs.github.io/tagstack/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+<link rel="stylesheet" href="https://kovirlabs.github.io/tagstack/brand.css">
 <script src="tagaction.min.js" defer></script>
 </head>
 <body>
 <header>
-  <nav>
+  <nav aria-label="Tag family" data-brand="bar">
+    <a href="https://kovirlabs.github.io/tagstack/"><img src="https://kovirlabs.github.io/tagstack/mark.svg" alt="" width="24" height="24">Tag family</a>
+    <ul>
+      <li><a href="https://kovirlabs.github.io/tagbrush/">TagBrush.css</a></li>
+      <li><a href="https://kovirlabs.github.io/tagaction/" aria-current="page">TagAction</a></li>
+      <li><a href="https://kovirlabs.github.io/tagcheck/">TagCheck</a></li>
+      <li><a href="https://kovirlabs.github.io/tagkit/">TagKit</a></li>
+      <li><a href="https://github.com/kovirlabs/tagaction">GitHub</a></li>
+    </ul>
+  </nav>
+  <nav aria-label="TagAction">
     <strong>TagAction</strong>
     <ul>
-      <li><a href="index.html">Demo</a></li>
-      <li><a href="https://github.com/kovirlabs/tagaction">GitHub</a></li>
-      <li><button class="outline" aria-expanded="false" aria-controls="family">Family</button>
-        <ul id="family">
-          <li><a href="https://github.com/kovirlabs/tagbrush">TagBrush</a></li>
-          <li><a href="https://github.com/kovirlabs/tagcheck">TagCheck</a></li>
-          <li><a href="https://github.com/kovirlabs/tagkit">TagKit</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><button class="outline" aria-expanded="false" aria-controls="guides">Guides</button>
+        <ul id="guides">
+          <li><a href="https://github.com/kovirlabs/tagaction#readme">README</a></li>
+          <li><a href="https://raw.githubusercontent.com/kovirlabs/tagaction/main/llms.txt">llms.txt, for AI agents</a></li>
+          <li><a href="https://github.com/kovirlabs/tagaction/blob/main/CHANGELOG.md">Changelog</a></li>
         </ul>
       </li>
     </ul>
@@ -32,7 +43,7 @@
 <main>
   <aside><nav data-tag-toc></nav></aside>
   <article>
-    <h2>Install</h2>
+    <h2 id="install">Install</h2>
     <p>Add one line to <code>&lt;head&gt;</code>. Copy it with the button.</p>
     <pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer&gt;&lt;/script&gt;</code></pre>
     <p>Released <time datetime="2026-11-06T17:00Z" data-tag-time="relative">November 6, 2026</time>. Times with a timezone, like <time datetime="2026-11-06T17:00Z">17:00 UTC</time>, show in your own. Tap <abbr title="Progressive enhancement">PE</abbr> on a phone to read it.</p>
@@ -103,8 +114,9 @@
     </figure>
   </article>
 </main>
-<footer>
-  <p>TagAction is part of the Tag family by Kovir Labs. Apache-2.0.</p>
+<footer data-brand="footer">
+  <p>TagAction is open source under Apache-2.0. <a href="https://github.com/kovirlabs/tagaction">Source on GitHub</a>, <a href="https://www.npmjs.com/package/tagaction">package on npm</a>.</p>
+  <p>Part of the <a href="https://kovirlabs.github.io/tagstack/">Tag family</a> from Kovir Labs.</p>
 </footer>
 </body>
 </html>
