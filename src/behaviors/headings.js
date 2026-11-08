@@ -1,6 +1,8 @@
 // <h2> and <h3>:
 // - <nav data-tag-toc> is filled with a table of contents of the h2 and h3
-//   headings in <main> (or the page), giving headings ids where needed.
+//   headings in <main> (or the page), giving headings ids where needed. A
+//   hidden nav (empty without JavaScript) is shown once it has links, and so
+//   is a hidden element around it.
 // - Every h2 and h3 with an id gets a "#" link to itself, so readers can copy
 //   a link to the section.
 
@@ -41,6 +43,7 @@ function buildToc(nav) {
     }
   }
   nav.append(list);
+  for (let el = nav; el; el = el.parentElement?.closest('[hidden]')) el.hidden = false;
   if (!nav.hasAttribute('aria-label') && !nav.hasAttribute('aria-labelledby')) nav.setAttribute('aria-label', 'On this page');
 }
 

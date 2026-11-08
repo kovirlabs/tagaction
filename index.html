@@ -41,7 +41,7 @@
   </hgroup>
 </header>
 <main>
-  <aside><nav data-tag-toc></nav></aside>
+  <aside><nav data-tag-toc hidden></nav></aside>
   <article>
     <h2 id="install">Install</h2>
     <p>Add one line to <code>&lt;head&gt;</code>. Copy it with the button.</p>
@@ -77,7 +77,10 @@
       <select id="room" name="room"><option value="120">Standard ($120)</option><option value="180">Suite ($180)</option></select>
       <label><input type="checkbox" id="breakfast" name="breakfast" value="15"> Breakfast ($15)</label>
       <label><input type="checkbox" id="parking" name="parking" value="10"> Parking ($10)</label>
-      <p>Per night: $<output for="room breakfast parking"></output></p>
+      <p>Per night: <output for="room breakfast parking" data-tag-format="USD">$120.00</output></p>
+      <label for="nights">Nights</label>
+      <input type="number" id="nights" name="nights" value="2" min="1">
+      <p>Room for the stay: <output for="nights room" data-tag-calc="product" data-tag-format="USD">$240.00</output></p>
       <h3>Guests</h3>
       <ul>
         <li><label for="guest">Guest name</label><input id="guest" name="guest"></li>

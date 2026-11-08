@@ -21,6 +21,13 @@
     <label for="fee">Fee</label><input type="number" id="fee" value="15.5">
     <label><input type="checkbox" id="breakfast" value="20"> Breakfast</label>
     <p>Total: <output id="total" for="nights fee breakfast"></output></p>
+    <fieldset><legend>Room</legend>
+      <label><input type="radio" name="room" id="standard" value="90" checked> Standard</label>
+      <label><input type="radio" name="room" id="deluxe" value="140"> Deluxe</label>
+    </fieldset>
+    <p>Stay: <output id="stay" for="nights standard deluxe" data-tag-calc="product" data-tag-format="USD">$180.00</output></p>
+    <label for="tip">Tip</label><input type="number" id="tip" value="0.15" step="0.01">
+    <output id="tip-out" for="tip" data-tag-format="percent">15%</output>
     <label for="notes">Notes</label>
     <textarea id="notes"></textarea>
   </form>

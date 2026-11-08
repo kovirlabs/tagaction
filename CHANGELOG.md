@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Tested with TagBrush.css 1.2.0.
+- `<output data-tag-calc="product">` multiplies the fields it lists (nights × nightly rate), leaving out unchecked checkboxes and radios, and `data-tag-format` shows the result as currency (`USD`), a percent, or a grouped number in the page's language. An agent in the family evaluation couldn't multiply and put the "$" outside the output.
+- A `<nav data-tag-toc hidden>` is shown once it's filled, and so is a hidden element around it, so readers without JavaScript don't get an empty "On this page" menu. Write `hidden` on the nav (the guide, README, and demo do).
 - `llms.txt` lists the file endings that make a link an image link for the viewer (`.jpg`, `.png`, …). An agent in the family evaluation linked a photo to an address without one, as TagKit's blog template did, and the viewer never opened.
 - The demo page (the GitHub Pages site) wears the Tag family brand: the family bar, the shared theme from kovirlabs.github.io/tagstack/brand.css, and a footer linking the family.
 

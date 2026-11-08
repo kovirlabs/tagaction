@@ -281,6 +281,24 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await expect(page.locator('#total')).toHaveText('38.5');
   });
 
+  test('output multiplies with data-tag-calc="product" and formats with data-tag-format', async ({ page }) => {
+    await open(page, 'widgets.html');
+    const stay = page.locator('#stay');
+    await expect(stay).toHaveText('$180.00');
+    await page.getByLabel('Deluxe').check(); // unchecked radios are left out of the product
+    await expect(stay).toHaveText('$280.00');
+    await page.getByLabel('Nights').fill('3');
+    await expect(stay).toHaveText('$420.00');
+    await page.getByLabel('Standard').focus();
+    await page.keyboard.press('Space');
+    await expect(stay).toHaveText('$270.00');
+    await page.getByLabel('Tip').fill('0.2');
+    await expect(page.locator('#tip-out')).toHaveText('20%');
+    // Added later (htmx, any script): formatted right away
+    await page.evaluate(() => document.querySelector('form').insertAdjacentHTML('beforeend', '<output id="late" for="fee" data-tag-format="number"></output>'));
+    await expect(page.locator('#late')).toHaveText('15.5');
+  });
+
   test('a --clone button adds template copies with unique ids and focuses them', async ({ page }) => {
     await open(page, 'widgets.html');
     const add = page.getByRole('button', { name: 'Add guest' });
@@ -340,10 +358,18 @@ test.describe('nav and headings', () => {
   test('data-tag-toc builds a nested table of contents with unique ids', async ({ page }) => {
     await open(page, 'nav.html');
     const toc = page.locator('nav[data-tag-toc]');
+    await expect(toc).toBeVisible(); // hidden in the HTML, shown once it has links
     await expect(toc).toHaveAttribute('aria-label', 'On this page');
     await expect(toc.locator(':scope > ul > li > a')).toHaveText(['Install', 'Use it', 'Install']);
     await expect(toc.locator('ul ul a')).toHaveText(['From npm']);
     expect(await toc.locator('a').evaluateAll((links) => links.map((a) => a.getAttribute('href')))).toEqual(['#install', '#from-npm', '#use', '#install-2']);
+  });
+
+  test('a hidden element around a table of contents added later is shown with it', async ({ page }) => {
+    await open(page, 'nav.html');
+    await page.evaluate(() => document.querySelector('article').insertAdjacentHTML('afterbegin', '<div id="box" hidden><nav data-tag-toc aria-label="Contents"></nav></div>'));
+    await expect(page.locator('#box')).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Contents' }).getByRole('link', { name: 'From npm' })).toBeVisible();
   });
 
   test('h2 and h3 with ids get anchor links', async ({ page }) => {

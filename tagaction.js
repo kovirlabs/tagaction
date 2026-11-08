@@ -489,6 +489,7 @@
       }
     }
     nav.append(list);
+    for (let el = nav; el; el = el.parentElement?.closest("[hidden]")) el.hidden = false;
     if (!nav.hasAttribute("aria-label") && !nav.hasAttribute("aria-labelledby")) nav.setAttribute("aria-label", "On this page");
   }
   function init11(root) {
@@ -650,21 +651,30 @@
   }
 
   // src/behaviors/output.js
-  function valueOf(field) {
-    if ((field.type === "checkbox" || field.type === "radio") && !field.checked) return 0;
-    return field.value;
+  function format(value, how) {
+    const number = parseFloat(value);
+    if (!how || Number.isNaN(number)) return String(value);
+    const options = how === "percent" ? { style: "percent", maximumFractionDigits: 2 } : how === "number" ? {} : { style: "currency", currency: how };
+    try {
+      return new Intl.NumberFormat(document.documentElement.lang || void 0, options).format(number);
+    } catch {
+      return String(value);
+    }
   }
   function init15(root) {
     each(root, "output[for]", "output", (output) => {
       const fields = output.getAttribute("for").split(/\s+/).map((id) => document.getElementById(id)).filter(Boolean);
       if (!fields.length) return;
+      const product = output.dataset.tagCalc === "product";
       const update = () => {
-        if (fields.length === 1) {
-          output.value = valueOf(fields[0]);
-          return;
+        const counted = fields.filter((field) => !/^(checkbox|radio)$/.test(field.type) || field.checked);
+        let result;
+        if (fields.length === 1) result = counted.length ? fields[0].value : 0;
+        else {
+          const numbers = counted.map((field) => parseFloat(field.value) || 0);
+          result = Math.round(numbers.reduce((a, b) => product ? a * b : a + b, product ? 1 : 0) * 1e6) / 1e6;
         }
-        const total = fields.reduce((sum, field) => sum + (parseFloat(valueOf(field)) || 0), 0);
-        output.value = String(Math.round(total * 1e6) / 1e6);
+        output.value = format(result, output.dataset.tagFormat);
       };
       for (const target of new Set(fields.map((field) => field.form ?? field))) {
         target.addEventListener("input", update);

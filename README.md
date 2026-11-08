@@ -28,10 +28,10 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<pre>` | Copy button | automatic |
 | `<time>` | Reader's timezone; "3 hours ago" | `datetime` with a zone; `data-tag-time="relative"` |
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
-| `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc>` |
+| `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
 | `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside | `<button aria-expanded aria-controls>`; popover menus |
-| `<output>` | Live value or total | native `for` |
+| `<output>` | Live value, total, or product; currency and percent formatting | native `for`; `data-tag-calc="product"`, `data-tag-format="USD"` |
 | `<abbr>` | Title shown on tap | `title` |
 | `<template>` | Add repeated rows | `<button commandfor command="--clone">` |
 

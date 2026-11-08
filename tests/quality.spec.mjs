@@ -20,10 +20,10 @@ test.describe('without JavaScript', () => {
         const target = page.locator(`#${list}`);
         if (await target.count()) await expect(target).toBeVisible();
       }
-      // Only controls that need TagAction may be hidden: --clone buttons and
-      // filter boxes with aria-controls.
+      // Only things that need TagAction may be hidden: --clone buttons, filter
+      // boxes with aria-controls, and tables of contents (empty until filled).
       const hidden = await page.locator('body [hidden]').evaluateAll((els) => els.map((e) => e.outerHTML.slice(0, 80)));
-      for (const html of hidden) expect(html).toMatch(/command="--clone"|aria-controls=/);
+      for (const html of hidden) expect(html).toMatch(/command="--clone"|aria-controls=|data-tag-toc/);
     });
   }
 });
