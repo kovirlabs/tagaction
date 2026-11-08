@@ -189,6 +189,9 @@ test.describe('textarea, file, password', () => {
     await expect(counter).not.toHaveAttribute('data-tag-low');
     await page.getByLabel('Bio').fill('x'.repeat(35));
     await expect(counter).toHaveAttribute('data-tag-low', '');
+    // With help text, the help stays right after the field and the counter follows it
+    await expect(page.locator('#note + small')).toHaveText('Optional.');
+    await expect(page.locator('#note + small + small[data-tag="count"]')).toHaveText('0 / 100');
   });
 
   test('a textarea without rows grows as you type', async ({ page }) => {
