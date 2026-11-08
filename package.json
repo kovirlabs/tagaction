@@ -1,6 +1,6 @@
 {
   "name": "tagaction",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tiny, no-build script that makes semantic HTML tags behave the way people expect: sortable tables, copy buttons on code, password toggles, dialogs that open from a button, and more. Companion to TagBrush.css.",
   "keywords": [
     "html",

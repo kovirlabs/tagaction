@@ -97,7 +97,7 @@ Current Chrome, Edge, Firefox, and Safari. Where a browser lacks `commandfor`, e
 
 ## Tested with
 
-TagAction 0.1.0 was tested with TagBrush.css 1.1.0. The main branch is tested with TagBrush.css 1.2.0.
+TagAction 0.2.0 is tested with TagBrush.css 1.2.0 (0.1.0 was tested with 1.1.0).
 
 ## Development
 
