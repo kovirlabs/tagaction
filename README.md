@@ -36,7 +36,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | Copy, share | Copy any field or element; share a link or section | `<button commandfor command="--copy">`, `command="--share"` |
 | `<output>` | Live value, total, or product; currency and percent formatting | native `for`; `data-tag-calc="product"`, `data-tag-format="USD"` |
 | `<abbr>` | Title shown on tap | `title` |
-| `<template>` | Add repeated rows | `<button commandfor command="--clone">` |
+| `<template>` | Add repeated rows, and remove any of them | `<button commandfor command="--clone">`, `command="--remove"` |
 
 [`llms.txt`](llms.txt) has the exact HTML for each one. It is the short, complete guide, written for people and for AI agents.
 

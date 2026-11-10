@@ -266,11 +266,11 @@
     return ALIGNED.test(data ? data.getAttribute("value") : cell.textContent.trim());
   };
   function markNumbers(table, headerRow) {
-    const rows = [...table.tBodies].flatMap((body) => [...body.rows]);
-    if (!rows.length || rows.some((row) => [...row.cells].some((cell) => cell.colSpan > 1))) return;
+    const rows2 = [...table.tBodies].flatMap((body) => [...body.rows]);
+    if (!rows2.length || rows2.some((row) => [...row.cells].some((cell) => cell.colSpan > 1))) return;
     [...headerRow.cells].forEach((th, index) => {
       if (th.colSpan > 1) return;
-      const cells = rows.map((row) => row.cells[index]).filter((cell) => cell && cell.textContent.trim());
+      const cells = rows2.map((row) => row.cells[index]).filter((cell) => cell && cell.textContent.trim());
       if (!cells.length || !cells.every(isNumber)) return;
       for (const cell of [th, ...cells]) if (!cell.dataset.tag) cell.dataset.tag = "num";
     });
@@ -289,9 +289,9 @@
     header.setAttribute("aria-sort", descending ? "descending" : "ascending");
     const index = header.cellIndex;
     for (const body of table.tBodies) {
-      const rows = [...body.rows];
-      rows.sort((a, b) => compare(sortKey(a.cells[index]), sortKey(b.cells[index])) * (descending ? -1 : 1));
-      body.append(...rows);
+      const rows2 = [...body.rows];
+      rows2.sort((a, b) => compare(sortKey(a.cells[index]), sortKey(b.cells[index])) * (descending ? -1 : 1));
+      body.append(...rows2);
     }
   }
   var results = /* @__PURE__ */ new WeakSet();
@@ -812,15 +812,29 @@
     template.before(fragment);
     added.map((element) => focusables(element)[0] ?? null).find(Boolean)?.focus();
   }
+  var rows = (element) => [...element.parentElement.children].filter((child) => !child.matches("template"));
+  function remove(row) {
+    const siblings = rows(row);
+    const index = siblings.indexOf(row);
+    const template = row.parentElement.querySelector(":scope > template[id]");
+    const add = template && find(document, `button[command="--clone"][commandfor="${CSS.escape(template.id)}"]`)[0];
+    const next = [siblings[index - 1], add, siblings[index + 1]].map((place) => place && (place.matches("button") ? place : focusables(place)[0])).find(Boolean);
+    row.remove();
+    next?.focus();
+  }
   function init17(root) {
     each(root, 'button[commandfor][command="--clone"]', "clone-button", (button) => {
       if (document.getElementById(button.getAttribute("commandfor"))?.matches("template")) reveal(button);
     });
+    each(root, 'button[commandfor][command="--remove"]', "remove-button", (button) => {
+      if (document.getElementById(button.getAttribute("commandfor"))) reveal(button);
+    });
     if (!once(document, "template")) return;
     document.addEventListener("command", (event) => {
-      const template = event.target;
-      if (event.command !== "--clone" || !template.matches?.("template") || !find(template, "template").length) return;
-      clone(template);
+      const target = event.target;
+      if (event.command === "--remove" && target.parentElement && find(target, "*").includes(target)) remove(target);
+      if (event.command !== "--clone" || !target.matches?.("template") || !find(target, "template").length) return;
+      clone(target);
     }, true);
   }
 

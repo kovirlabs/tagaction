@@ -20,14 +20,14 @@ test.describe('without JavaScript', () => {
         const target = page.locator(`#${list}`);
         if (await target.count()) await expect(target).toBeVisible();
       }
-      // Only things that need TagAction may be hidden: --clone, --copy and
+      // Only things that need TagAction may be hidden: --clone, --remove, --copy and
       // --share buttons, filter boxes with aria-controls, theme switches, and
       // tables of contents (empty until filled).
       // A list a hidden search box controls is a results list, also JS-only.
       const hidden = await page.locator('body [hidden]').evaluateAll((els) => els
         .filter((e) => !(e.id && document.querySelector(`[hidden][aria-controls="${e.id}"]`)))
         .map((e) => e.outerHTML.slice(0, 80)));
-      for (const html of hidden) expect(html).toMatch(/command="--(clone|copy|share)"|aria-controls=|data-tag-toc|data-tag-theme/);
+      for (const html of hidden) expect(html).toMatch(/command="--(clone|remove|copy|share)"|aria-controls=|data-tag-toc|data-tag-theme/);
     });
   }
 });

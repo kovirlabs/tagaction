@@ -83,8 +83,8 @@
       <p>Room for the stay: <output for="nights room" data-tag-calc="product" data-tag-format="USD">$240.00</output></p>
       <h3>Guests</h3>
       <ul>
-        <li><label for="guest">Guest name</label><input id="guest" name="guest"></li>
-        <template id="new-guest"><li><label for="guest">Guest name</label><input id="guest" name="guest"></li></template>
+        <li id="guest-row"><label for="guest">Guest name</label><input id="guest" name="guest"> <button type="button" class="secondary" commandfor="guest-row" command="--remove" hidden>Remove</button></li>
+        <template id="new-guest"><li id="guest-row"><label for="guest">Guest name</label><input id="guest" name="guest"> <button type="button" class="secondary" commandfor="guest-row" command="--remove" hidden>Remove</button></li></template>
       </ul>
       <div role="group">
         <button type="button" class="secondary" commandfor="new-guest" command="--clone" hidden>Add guest</button>

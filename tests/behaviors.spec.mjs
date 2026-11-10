@@ -384,6 +384,34 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  test('a --remove button takes its row out, and focus moves to the previous row or the Add button', async ({ page }) => {
+    await open(page, 'widgets.html');
+    const items = page.locator('#items > li');
+    const removes = page.locator('#items').getByRole('button', { name: 'Remove' });
+    await expect(removes).toHaveCount(1);
+    await expect(removes.first()).toBeVisible(); // written hidden; shown by TagAction
+    await page.click('#add-item');
+    await page.click('#add-item');
+    await expect(items).toHaveCount(3);
+    await expect(removes).toHaveCount(3);
+    await expect(removes.nth(2)).toBeVisible(); // copies added later are shown too
+    await expect(page.locator('#item-3 [commandfor="item-3"]')).toHaveCount(1);
+    // Mouse: remove the middle row; focus goes to the row before it.
+    await page.locator('#item-2').getByRole('button', { name: 'Remove' }).click();
+    await expect(items).toHaveCount(2);
+    await expect(page.locator('#item-2')).toHaveCount(0);
+    await expect(page.locator('#item-name')).toBeFocused();
+    // Keyboard: remove the first row; with no row before it, focus goes to Add.
+    await page.locator('#item').getByRole('button', { name: 'Remove' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(items).toHaveCount(1);
+    await expect(page.locator('#add-item')).toBeFocused();
+    // An opted-out target stays.
+    await page.locator('#item-3').evaluate((el) => { el.dataset.tagaction = 'off'; });
+    await page.locator('#item-3').getByRole('button', { name: 'Remove' }).click();
+    await expect(items).toHaveCount(1);
+  });
+
   test('data-tag-remember keeps details open across visits; name groups open one at a time', async ({ page }) => {
     await open(page, 'widgets.html');
     await page.getByText('Setup').click();

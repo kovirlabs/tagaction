@@ -36,6 +36,11 @@
     <template id="new-guest"><li><label for="guest">Guest</label><input id="guest" name="guest"></li></template>
   </ul>
   <button type="button" commandfor="new-guest" command="--clone" hidden>Add guest</button>
+  <ul id="items">
+    <li id="item"><label for="item-name">Item</label><input id="item-name" name="item"> <button type="button" commandfor="item" command="--remove" hidden>Remove</button></li>
+    <template id="new-item"><li id="item"><label for="item-name">Item</label><input id="item-name" name="item"> <button type="button" commandfor="item" command="--remove" hidden>Remove</button></li></template>
+  </ul>
+  <button type="button" commandfor="new-item" command="--clone" hidden id="add-item">Add item</button>
   <section data-tag-remember>
     <details id="setup"><summary>Setup</summary><p>Install it.</p></details>
   </section>
