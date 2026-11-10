@@ -6,6 +6,9 @@
 // - Filtering: <input type="search" aria-controls="table-id"> hides rows that
 //   don't contain every typed word. It also filters the <li>s of a list. A
 //   list written with `hidden` shows only while there's a search (results).
+//   A role="status" line after the table or list says "No matches for …"
+//   when nothing matches, and otherwise tells screen readers how many rows
+//   are shown ("3 of 12 shown") while staying out of sight.
 // - Number columns: a column whose body cells all hold numbers (or a <data
 //   value> number) gets data-tag="num" on its header and cells, and the
 //   injected styles line it up on the right in tabular figures. An align
@@ -66,15 +69,32 @@ function sort(table, header) {
 }
 
 const results = new WeakSet(); // lists written hidden: shown only while there's a search
+const statuses = new WeakMap(); // target -> its role="status" line
+
+function statusFor(target) {
+  let status = statuses.get(target);
+  if (!status) {
+    status = h('p', { role: 'status', 'data-tag': 'filter-status' });
+    target.after(status);
+    statuses.set(target, status);
+  }
+  return status;
+}
 
 function filter(control, target) {
   const words = control.value.toLowerCase().split(/\s+/).filter(Boolean);
   if (results.has(target)) target.hidden = !words.length;
   const items = target.tBodies ? [...target.tBodies].flatMap((body) => [...body.rows]) : [...target.children].filter((child) => child.matches('li'));
+  let shown = 0;
   for (const item of items) {
     const text = item.textContent.toLowerCase();
     item.hidden = !words.every((word) => text.includes(word));
+    if (!item.hidden) shown++;
   }
+  const status = statusFor(target);
+  const none = words.length > 0 && shown === 0;
+  status.toggleAttribute('data-tag-empty', none);
+  status.textContent = !words.length ? '' : none ? `No matches for “${control.value.trim()}”` : `${shown} of ${items.length} shown`;
 }
 
 export function init(root) {
@@ -99,6 +119,7 @@ export function init(root) {
     // while something is typed, like a site search over a list of every page.
     if (target.hidden && !target.matches('table')) results.add(target);
     reveal(control);
+    statusFor(target);
     control.addEventListener('input', () => filter(control, target));
     if (control.value) filter(control, target);
   });

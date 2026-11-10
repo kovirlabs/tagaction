@@ -119,6 +119,27 @@ test.describe('table', () => {
     await expect(page.locator('#one-row button')).toHaveCount(0);
   });
 
+  test('a filter that matches nothing says so, and otherwise tells screen readers the count', async ({ page }) => {
+    await open(page, 'table.html');
+    const status = page.locator('#orders + [role="status"]');
+    await expect(status).toHaveText('');
+    const filter = page.getByLabel('Filter orders');
+    await filter.pressSequentially('zzz');
+    await expect(status).toHaveText('No matches for “zzz”');
+    await expect(status).toBeVisible();
+    expect((await status.boundingBox()).width).toBeGreaterThan(50);
+    await filter.fill('maya');
+    await expect(status).toHaveText('1 of 4 shown');
+    expect((await status.boundingBox()).width).toBeLessThanOrEqual(1); // for screen readers only
+    await filter.fill('');
+    await expect(status).toHaveText('');
+    // A list filtered by a box added later gets its own line.
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<input type="search" aria-label="Filter colors" aria-controls="colors"><ul id="colors"><li>Red</li><li>Blue</li></ul>'));
+    await page.getByLabel('Filter colors').fill('green');
+    await expect(page.locator('#colors + [role="status"]')).toHaveText('No matches for “green”');
+  });
+
   test('a search input with aria-controls filters rows and list items', async ({ page }) => {
     await open(page, 'table.html');
     await page.getByLabel('Filter orders').fill('maya');
