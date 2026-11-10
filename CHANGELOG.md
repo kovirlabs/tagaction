@@ -13,6 +13,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - `data-tag-match="password"` keeps a confirm field invalid, with a message, until it matches.
 - A list a filter box controls, written with `hidden`, is a list of search results: it shows only while something is typed, with just the matches. TagKit's MkDocs theme uses it for search by page title.
 - Fix: help text in a `<small>` after a password field sat inline beside the next label once the Show/Hide row wrapped the field (TagKit's sign-up page). It now stays under the row, muted, and turns red with the field.
+- Columns of numbers line up on the right. TagAction already knew which columns hold numbers for sorting; it now marks their header and cells `data-tag="num"`, and its own sheet sets `text-align: end` and tabular figures. TagBrush.css only aligned a cell holding a lone `<data>`, so a "Customers" column (42, 118) sat on the left beside a right-aligned "Revenue", and no header lined up with its numbers. Dates (`<time>`) are not numbers. An `align` attribute or the page's own `text-align` wins.
 - Size: about 9 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

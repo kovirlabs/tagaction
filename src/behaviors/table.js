@@ -6,6 +6,10 @@
 // - Filtering: <input type="search" aria-controls="table-id"> hides rows that
 //   don't contain every typed word. It also filters the <li>s of a list. A
 //   list written with `hidden` shows only while there's a search (results).
+// - Number columns: a column whose body cells all hold numbers (or a <data
+//   value> number) gets data-tag="num" on its header and cells, and the
+//   injected styles line it up on the right in tabular figures. An align
+//   attribute or the page's own text-align wins.
 
 import { each, h, reveal } from '../core.js';
 
@@ -17,6 +21,24 @@ function sortKey(cell) {
   const valued = cell.querySelector('data[value], time[datetime], meter, progress');
   if (valued) return valued.getAttribute('value') ?? valued.getAttribute('datetime') ?? '';
   return cell.textContent.trim();
+}
+
+const isNumber = (cell) => {
+  if (cell.querySelector('time, meter, progress')) return false; // "Mar 2" would pass the sort test
+  const data = cell.querySelector('data[value]');
+  return NUMBER.test(data ? data.getAttribute('value') : cell.textContent.trim());
+};
+
+// Mark the columns where every non-empty body cell is a number.
+function markNumbers(table, headerRow) {
+  const rows = [...table.tBodies].flatMap((body) => [...body.rows]);
+  if (!rows.length || rows.some((row) => [...row.cells].some((cell) => cell.colSpan > 1))) return;
+  [...headerRow.cells].forEach((th, index) => {
+    if (th.colSpan > 1) return;
+    const cells = rows.map((row) => row.cells[index]).filter((cell) => cell && cell.textContent.trim());
+    if (!cells.length || !cells.every(isNumber)) return;
+    for (const cell of [th, ...cells]) if (!cell.dataset.tag) cell.dataset.tag = 'num';
+  });
 }
 
 function compare(a, b) {
@@ -55,7 +77,9 @@ function filter(control, target) {
 export function init(root) {
   each(root, 'table', 'table', (table) => {
     const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
-    if (!headerRow || ![...table.tBodies].some((body) => body.rows.length > 1)) return;
+    if (!headerRow) return;
+    markNumbers(table, headerRow);
+    if (![...table.tBodies].some((body) => body.rows.length > 1)) return;
     for (const th of headerRow.cells) {
       if (th.tagName !== 'TH' || th.colSpan > 1 || th.dataset.tagaction === 'off' || !th.textContent.trim()) continue;
       const button = h('button', { type: 'button', 'data-tag': 'sort' });

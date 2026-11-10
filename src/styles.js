@@ -8,6 +8,7 @@ const CSS = `@layer tagaction {
 :where([data-tag="copy"]) { position: absolute; top: 0.4rem; right: 0.4rem; margin: 0; padding: 0.15rem 0.6rem; font-size: 0.8rem; line-height: 1.5; background: var(--color-surface, Canvas); }
 :where(:has(> [data-tag="dropdown"])) { position: relative; }
 :where([data-tag="dropdown"]:not([hidden])) { position: absolute; z-index: 10; top: 100%; right: 0; min-width: 12rem; margin: 0.25rem 0 0; padding: 0.5rem; display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem; list-style: none; background: var(--color-surface, Canvas); border: 1px solid var(--color-border, GrayText); border-radius: var(--border-radius, 0.5rem); box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); }
+:where([data-tag="num"]:not([align])) { text-align: end; font-variant-numeric: tabular-nums; }
 :where([data-tag="sort"]) { all: unset; display: inline-flex; align-items: center; gap: 0.35em; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }
 :where([data-tag="sort"]):focus-visible { outline: 2px solid var(--color-primary, Highlight); outline-offset: 2px; border-radius: 2px; }
 :where([data-tag="sort"])::after { content: "↕" / ""; opacity: 0.45; font-size: 0.85em; }

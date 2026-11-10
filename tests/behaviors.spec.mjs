@@ -77,6 +77,32 @@ test.describe('table', () => {
     expect(await column(page, 'numbers', 2)).toEqual(['15', '900', '1,200']);
   });
 
+  test('number columns line up on the right, header included; an author\'s align or text-align wins', async ({ page }) => {
+    await open(page, 'table.html');
+    const align = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).textAlign);
+    const nums = (table) => page.locator(`#${table} thead th`).evaluateAll((els) => els.map((el) => el.dataset.tag === 'num'));
+    expect(await nums('orders')).toEqual([false, true, false, false]); // <data value>; dates and names are not numbers
+    expect(await nums('aligned')).toEqual([false, true, true, false, true]); // an empty cell doesn't count against a column
+    expect(await align('#aligned thead th:nth-child(2)')).toBe('end');
+    expect(await align('#aligned tbody td:nth-child(2)')).toBe('end');
+    expect(await page.locator('#aligned tbody td:nth-child(2)').first().evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toBe('tabular-nums');
+    expect(await align('#aligned tbody td:nth-child(1)')).toBe('start'); // false match: names stay on the left
+    expect(await align('#aligned tbody td:nth-child(4)')).toBe('start'); // "Pro 2" is text
+    expect(await align('#aligned tbody td:nth-child(3)')).toMatch(/center/); // align="center" wins
+    expect(await align('#aligned tbody td:nth-child(5)')).toBe('center'); // style wins
+    // Sorting keeps the marks on the moved cells.
+    await page.locator('#aligned').getByRole('button', { name: 'Clients' }).click();
+    await expect(page.locator('#aligned tbody td:nth-child(2)[data-tag="num"]')).toHaveCount(2);
+  });
+
+  test('a table added later gets its number columns marked', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<table id="late"><thead><tr><th>Name</th><th>Total</th></tr></thead><tbody><tr><td>A</td><td>$5</td></tr><tr><td>B</td><td>$12</td></tr></tbody></table>'));
+    await expect(page.locator('#late th[data-tag="num"]')).toHaveText('Total');
+    await expect(page.locator('#late td[data-tag="num"]')).toHaveCount(2);
+  });
+
   test('keyboard: header buttons sort with Enter and Space', async ({ page }) => {
     await open(page, 'table.html');
     await page.locator('#numbers').getByRole('button', { name: 'Item' }).focus();
