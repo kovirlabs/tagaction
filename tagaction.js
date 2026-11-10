@@ -259,10 +259,11 @@
     if (valued) return valued.getAttribute("value") ?? valued.getAttribute("datetime") ?? "";
     return cell.textContent.trim();
   }
+  var ALIGNED = /^\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}$/u;
   var isNumber = (cell) => {
     if (cell.querySelector("time, meter, progress")) return false;
     const data = cell.querySelector("data[value]");
-    return NUMBER.test(data ? data.getAttribute("value") : cell.textContent.trim());
+    return ALIGNED.test(data ? data.getAttribute("value") : cell.textContent.trim());
   };
   function markNumbers(table, headerRow) {
     const rows = [...table.tBodies].flatMap((body) => [...body.rows]);

@@ -23,10 +23,13 @@ function sortKey(cell) {
   return cell.textContent.trim();
 }
 
+// Stricter than the sort's test: only a currency sign may lead, not a letter
+// or a "#" ("Q1", "Mar 2", "#1042" are labels).
+const ALIGNED = /^\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}$/u;
 const isNumber = (cell) => {
-  if (cell.querySelector('time, meter, progress')) return false; // "Mar 2" would pass the sort test
+  if (cell.querySelector('time, meter, progress')) return false;
   const data = cell.querySelector('data[value]');
-  return NUMBER.test(data ? data.getAttribute('value') : cell.textContent.trim());
+  return ALIGNED.test(data ? data.getAttribute('value') : cell.textContent.trim());
 };
 
 // Mark the columns where every non-empty body cell is a number.

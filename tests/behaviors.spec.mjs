@@ -82,17 +82,18 @@ test.describe('table', () => {
     const align = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).textAlign);
     const nums = (table) => page.locator(`#${table} thead th`).evaluateAll((els) => els.map((el) => el.dataset.tag === 'num'));
     expect(await nums('orders')).toEqual([false, true, false, false]); // <data value>; dates and names are not numbers
-    expect(await nums('aligned')).toEqual([false, true, true, false, true]); // an empty cell doesn't count against a column
-    expect(await align('#aligned thead th:nth-child(2)')).toBe('end');
-    expect(await align('#aligned tbody td:nth-child(2)')).toBe('end');
-    expect(await page.locator('#aligned tbody td:nth-child(2)').first().evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toBe('tabular-nums');
+    expect(await nums('aligned')).toEqual([false, false, true, true, false, true]); // "#1042" is an id // an empty cell doesn't count against a column
+    expect(await align('#aligned thead th:nth-child(3)')).toBe('end');
+    expect(await align('#aligned tbody td:nth-child(3)')).toBe('end');
+    expect(await page.locator('#aligned tbody td:nth-child(3)').first().evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toBe('tabular-nums');
     expect(await align('#aligned tbody td:nth-child(1)')).toBe('start'); // false match: names stay on the left
-    expect(await align('#aligned tbody td:nth-child(4)')).toBe('start'); // "Pro 2" is text
-    expect(await align('#aligned tbody td:nth-child(3)')).toMatch(/center/); // align="center" wins
-    expect(await align('#aligned tbody td:nth-child(5)')).toBe('center'); // style wins
+    expect(await align('#aligned tbody td:nth-child(2)')).toBe('start'); // and ids
+    expect(await align('#aligned tbody td:nth-child(5)')).toBe('start'); // "Q1" is a label, not a number
+    expect(await align('#aligned tbody td:nth-child(4)')).toMatch(/center/); // align="center" wins
+    expect(await align('#aligned tbody td:nth-child(6)')).toMatch(/center/); // style wins
     // Sorting keeps the marks on the moved cells.
     await page.locator('#aligned').getByRole('button', { name: 'Clients' }).click();
-    await expect(page.locator('#aligned tbody td:nth-child(2)[data-tag="num"]')).toHaveCount(2);
+    await expect(page.locator('#aligned tbody td:nth-child(3)[data-tag="num"]')).toHaveCount(2);
   });
 
   test('a table added later gets its number columns marked', async ({ page }) => {
