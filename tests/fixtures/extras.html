@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>More behaviors</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <strong>Lumen</strong>
+            <ul>
+                <li><details id="services"><summary>Services</summary><ul><li><a href="#grants" id="grants-link">Grant writing</a></li><li><a href="#coaching">Coaching</a></li></ul></details></li>
+                <li><select data-tag-theme aria-label="Color scheme" id="theme-select" hidden><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></li>
+                <li><button data-tag-theme id="theme-button" hidden>Dark mode</button></li>
+                <li><button popovertarget="menu" aria-label="More" id="menu-button">☰</button></li>
+            </ul>
+            <div popover id="menu">
+                <ul>
+                    <li><a href="#faq" id="faq-link">FAQ</a></li>
+                    <li><a href="#coaching">Install</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section id="grants">
+            <h2>Grant writing</h2>
+            <p>Invite link: <input id="invite" value="https://lumen.example/join/4F7Q" aria-label="Invite link" readonly> <button commandfor="invite" command="--copy" id="copy-invite" hidden>Copy</button></p>
+            <p><code id="key">sk_live_51H8</code> <button commandfor="key" command="--copy" id="copy-key" hidden>Copy key</button></p>
+            <p><button commandfor="grants" command="--share" id="share" hidden>Share this section</button></p>
+        </section>
+
+        <section id="coaching">
+            <h2>Install</h2>
+            <div role="tablist" aria-label="Install with">
+                <button role="tab" aria-controls="npm" id="tab-npm">npm</button>
+                <button role="tab" aria-controls="cdn" aria-selected="true" id="tab-cdn">CDN</button>
+                <button role="tab" aria-controls="download" id="tab-download">Download</button>
+            </div>
+            <section id="npm" role="tabpanel"><pre><code>npm install tagaction</code></pre></section>
+            <section id="cdn" role="tabpanel"><p>Add the script tag.</p></section>
+            <section id="download" role="tabpanel"><p>Download tagaction.min.js.</p></section>
+        </section>
+
+        <section id="faq">
+            <h2>FAQ</h2>
+            <details name="faq" id="q-free"><summary>Is there a free plan?</summary><p id="free-answer">Yes, for one person.</p></details>
+            <details name="faq" id="q-offline"><summary>Does it work offline?</summary><p>Yes.</p></details>
+            <details id="plain"><summary>A disclosure outside the nav</summary><p>Stays open on outside clicks.</p></details>
+        </section>
+
+        <form id="signup">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+            <label for="confirm">Confirm password</label>
+            <input type="password" id="confirm" data-tag-match="password" required>
+            <button>Sign up</button>
+        </form>
+
+        <search>
+            <input type="search" aria-label="Search the docs" aria-controls="pages" id="site-search" hidden>
+        </search>
+        <ul id="pages" hidden>
+            <li><a href="#grants">Grant writing</a></li>
+            <li><a href="#coaching">Install</a></li>
+            <li><a href="#faq">Frequently asked questions</a></li>
+        </ul>
+    </main>
+</body>
+</html>

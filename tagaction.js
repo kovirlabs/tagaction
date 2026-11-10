@@ -118,10 +118,120 @@
     });
   }
 
+  // src/behaviors/menu.js
+  function arrowKeys(container, event, close) {
+    const items = focusables(container);
+    const index = items.indexOf(document.activeElement);
+    let next;
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") next = items[(index + 1) % items.length];
+    else if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = items[(index - 1 + items.length) % items.length];
+    else if (event.key === "Home") next = items[0];
+    else if (event.key === "End") next = items[items.length - 1];
+    else if (event.key === "Escape" && close) {
+      close(true);
+      event.preventDefault();
+      return;
+    }
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+  }
+  function init3(root) {
+    each(root, "button[aria-controls][aria-expanded]", "menu", (button) => {
+      const list = document.getElementById(button.getAttribute("aria-controls"));
+      if (!list || list.closest('[data-tagaction="off"]')) return;
+      reveal(button);
+      const isOpen = () => button.getAttribute("aria-expanded") === "true";
+      const set = (open) => {
+        button.setAttribute("aria-expanded", String(open));
+        list.hidden = !open;
+      };
+      const close = (returnFocus) => {
+        if (!isOpen()) return;
+        set(false);
+        if (returnFocus) button.focus();
+      };
+      if (list.parentElement === button.parentElement && list.closest("nav")) list.setAttribute("data-tag", "dropdown");
+      set(isOpen());
+      button.addEventListener("click", () => set(!isOpen()));
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") close(true);
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          set(true);
+          focusables(list)[0]?.focus();
+        }
+      });
+      list.addEventListener("keydown", (event) => arrowKeys(list, event, close));
+      document.addEventListener("click", (event) => {
+        if (isOpen() && !button.contains(event.target) && !list.contains(event.target)) close(false);
+      });
+      list.addEventListener("focusout", (event) => {
+        if (event.relatedTarget && !list.contains(event.relatedTarget) && event.relatedTarget !== button) close(false);
+      });
+    });
+    each(root, "menu, [popover]:has(nav, ul, ol, menu)", "arrows", (container) => {
+      container.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented || event.target.matches("input, textarea, select")) return;
+        arrowKeys(container, event);
+      });
+    });
+    each(root, "[popover]:has(a[href])", "popover-links", (popover) => {
+      popover.addEventListener("click", (event) => {
+        if (event.target.closest("a[href]") && popover.matches(":popover-open")) popover.hidePopover();
+      });
+    });
+  }
+
   // src/behaviors/details.js
+  function openTarget() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    let opened = false;
+    for (let details = target.closest("details"); details; details = details.parentElement?.closest("details")) {
+      if (!details.open) {
+        details.open = true;
+        opened = true;
+      }
+    }
+    if (opened) target.scrollIntoView();
+  }
+  function dropdown(details) {
+    const summary = details.querySelector(":scope > summary");
+    const close = (returnFocus) => {
+      if (!details.open) return;
+      details.open = false;
+      if (returnFocus) summary?.focus();
+    };
+    details.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        close(true);
+        event.preventDefault();
+        return;
+      }
+      if (!details.open || !["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+      const list = details.querySelector(":scope > :is(ul, ol, menu, nav)");
+      if (list) arrowKeys(list, event);
+    });
+    details.addEventListener("click", (event) => {
+      if (event.target.closest("a[href]")) close(false);
+    });
+    document.addEventListener("click", (event) => {
+      if (!details.contains(event.target)) close(false);
+    });
+    details.addEventListener("focusout", (event) => {
+      if (event.relatedTarget && !details.contains(event.relatedTarget)) close(false);
+    });
+  }
   var nativeGroups = () => "name" in HTMLDetailsElement.prototype;
   var keyFor = (details) => `tagaction:details:${location.pathname}#${details.id}`;
-  function init3(root) {
+  function init4(root) {
+    if (once(document, "details-hash")) {
+      addEventListener("hashchange", openTarget);
+      openTarget();
+    }
+    each(root, "header nav li > details", "details-dropdown", dropdown);
     each(root, "details", "details", (details) => {
       if (!nativeGroups() && details.getAttribute("name")) {
         details.addEventListener("toggle", () => {
@@ -168,15 +278,17 @@
       body.append(...rows);
     }
   }
+  var results = /* @__PURE__ */ new WeakSet();
   function filter(control, target) {
     const words = control.value.toLowerCase().split(/\s+/).filter(Boolean);
+    if (results.has(target)) target.hidden = !words.length;
     const items = target.tBodies ? [...target.tBodies].flatMap((body) => [...body.rows]) : [...target.children].filter((child) => child.matches("li"));
     for (const item of items) {
       const text = item.textContent.toLowerCase();
       item.hidden = !words.every((word) => text.includes(word));
     }
   }
-  function init4(root) {
+  function init5(root) {
     each(root, "table", "table", (table) => {
       const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
       if (!headerRow || ![...table.tBodies].some((body) => body.rows.length > 1)) return;
@@ -191,6 +303,7 @@
     each(root, 'input[aria-controls]:is([type="search"], [type="text"], :not([type]))', "filter", (control) => {
       const target = document.getElementById(control.getAttribute("aria-controls"));
       if (!target?.matches("table, ul, ol, menu")) return;
+      if (target.hidden && !target.matches("table")) results.add(target);
       reveal(control);
       control.addEventListener("input", () => filter(control, target));
       if (control.value) filter(control, target);
@@ -246,7 +359,7 @@
   function submitButton(form, submitter) {
     return submitter ?? form.querySelector('button:not([type]), button[type="submit"], input[type="submit"]');
   }
-  function init5(root) {
+  function init6(root) {
     each(root, "form", "form", (form) => {
       let firstInvalid = null;
       let dirty = false;
@@ -299,7 +412,7 @@
   }
 
   // src/behaviors/textarea.js
-  function init6(root) {
+  function init7(root) {
     each(root, "textarea:not([rows])", "grow", (textarea) => {
       if (CSS.supports?.("field-sizing", "content")) return;
       const grow = () => {
@@ -329,7 +442,7 @@
   }
 
   // src/behaviors/file.js
-  function init7(root) {
+  function init8(root) {
     each(root, 'input[type="file"]', "file", (input) => {
       let list = null;
       const update = () => {
@@ -370,7 +483,7 @@
   }
 
   // src/behaviors/password.js
-  function init8(root) {
+  function init9(root) {
     each(root, 'input[type="password"]', "password", (input) => {
       let group = input.parentElement;
       if (!group?.matches('[role="group"]')) {
@@ -412,7 +525,7 @@
       return copied;
     }
   }
-  function init9(root) {
+  function init10(root) {
     each(root, "pre", "copy", (pre) => {
       if (!pre.textContent.trim()) return;
       const wrapper = h("div", { "data-tag": "code" });
@@ -450,7 +563,7 @@
     time.textContent = relativeMode ? relative(date) : full;
     if (!time.title) time.title = full;
   }
-  function init10(root) {
+  function init11(root) {
     each(root, "time[datetime]", "time", render);
     if (find(document, 'time[data-tag-time="relative"]').length && once(document, "time-tick")) {
       setInterval(() => find(document, 'time[datetime][data-tag-time="relative"]').forEach(render), 6e4);
@@ -492,7 +605,7 @@
     for (let el = nav; el; el = el.parentElement?.closest("[hidden]")) el.hidden = false;
     if (!nav.hasAttribute("aria-label") && !nav.hasAttribute("aria-labelledby")) nav.setAttribute("aria-label", "On this page");
   }
-  function init11(root) {
+  function init12(root) {
     each(root, "nav[data-tag-toc]", "toc", buildToc);
     for (const heading of find(root, "h2[id], h3[id]")) {
       if (heading.parentElement.closest(SKIP) || !once(heading, "anchor")) continue;
@@ -533,7 +646,7 @@
     }, { passive: true });
     update();
   }
-  function init12(root) {
+  function init13(root) {
     each(root, "nav", "nav", (nav) => {
       const links = [...nav.querySelectorAll('a[href^="#"]')].filter((a) => a.hash.length > 1 && document.getElementById(decodeURIComponent(a.hash.slice(1))));
       if (links.length >= 2 && links.length === nav.querySelectorAll("a[href]").length) followScroll(nav, links);
@@ -560,7 +673,7 @@
     dialog.showModal();
   }
   var shrunk = (image) => image.naturalWidth > image.clientWidth * 1.2 || image.naturalHeight > image.clientHeight * 1.2;
-  function init13(root) {
+  function init14(root) {
     each(root, "a[href]:has(> img:only-child)", "zoom-link", (link) => {
       if (!IMAGE_FILE.test(new URL(link.href).pathname)) return;
       link.setAttribute("aria-haspopup", "dialog");
@@ -586,66 +699,6 @@
           event.preventDefault();
           open();
         }
-      });
-    });
-  }
-
-  // src/behaviors/menu.js
-  function arrowKeys(container, event, close) {
-    const items = focusables(container);
-    const index = items.indexOf(document.activeElement);
-    let next;
-    if (event.key === "ArrowDown" || event.key === "ArrowRight") next = items[(index + 1) % items.length];
-    else if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = items[(index - 1 + items.length) % items.length];
-    else if (event.key === "Home") next = items[0];
-    else if (event.key === "End") next = items[items.length - 1];
-    else if (event.key === "Escape" && close) {
-      close(true);
-      event.preventDefault();
-      return;
-    }
-    if (!next) return;
-    event.preventDefault();
-    next.focus();
-  }
-  function init14(root) {
-    each(root, "button[aria-controls][aria-expanded]", "menu", (button) => {
-      const list = document.getElementById(button.getAttribute("aria-controls"));
-      if (!list || list.closest('[data-tagaction="off"]')) return;
-      reveal(button);
-      const isOpen = () => button.getAttribute("aria-expanded") === "true";
-      const set = (open) => {
-        button.setAttribute("aria-expanded", String(open));
-        list.hidden = !open;
-      };
-      const close = (returnFocus) => {
-        if (!isOpen()) return;
-        set(false);
-        if (returnFocus) button.focus();
-      };
-      if (list.parentElement === button.parentElement && list.closest("nav")) list.setAttribute("data-tag", "dropdown");
-      set(isOpen());
-      button.addEventListener("click", () => set(!isOpen()));
-      button.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") close(true);
-        if (event.key === "ArrowDown") {
-          event.preventDefault();
-          set(true);
-          focusables(list)[0]?.focus();
-        }
-      });
-      list.addEventListener("keydown", (event) => arrowKeys(list, event, close));
-      document.addEventListener("click", (event) => {
-        if (isOpen() && !button.contains(event.target) && !list.contains(event.target)) close(false);
-      });
-      list.addEventListener("focusout", (event) => {
-        if (event.relatedTarget && !list.contains(event.relatedTarget) && event.relatedTarget !== button) close(false);
-      });
-    });
-    each(root, "menu, [popover]:has(nav, ul, ol, menu)", "arrows", (container) => {
-      container.addEventListener("keydown", (event) => {
-        if (event.defaultPrevented || event.target.matches("input, textarea, select")) return;
-        arrowKeys(container, event);
       });
     });
   }
@@ -745,10 +798,140 @@
     }, true);
   }
 
+  // src/behaviors/clipboard.js
+  var timers = /* @__PURE__ */ new WeakMap();
+  function say(button, text) {
+    if (!button.dataset.tagLabel) button.dataset.tagLabel = button.textContent;
+    button.textContent = text;
+    clearTimeout(timers.get(button));
+    timers.set(button, setTimeout(() => {
+      button.textContent = button.dataset.tagLabel;
+    }, 2e3));
+  }
+  async function share(target, button) {
+    const url = target.matches("a[href]") ? target.href : `${location.href.split("#")[0]}#${target.id}`;
+    const title = target.matches("a[href]") ? target.textContent.trim() : document.title;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+        return;
+      } catch (error) {
+        if (error.name === "AbortError") return;
+      }
+    }
+    say(button, await copy(url) ? "Link copied" : "Copy failed");
+  }
+  function init18(root) {
+    each(root, 'button[commandfor]:is([command="--copy"], [command="--share"])', "clipboard-button", (button) => {
+      if (document.getElementById(button.getAttribute("commandfor"))) reveal(button);
+    });
+    if (!once(document, "clipboard")) return;
+    document.addEventListener("command", async (event) => {
+      if (event.command !== "--copy" && event.command !== "--share") return;
+      const target = event.target;
+      const button = event.source;
+      if (!button || target.closest?.('[data-tagaction="off"]')) return;
+      if (event.command === "--share") return share(target, button);
+      const text = target.matches("input, textarea, select") ? target.value : target.textContent.trim();
+      say(button, await copy(text) ? "Copied" : "Press Ctrl+C to copy");
+    }, true);
+  }
+
+  // src/behaviors/theme.js
+  var KEY = "tagaction:theme";
+  function apply(theme) {
+    if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    else delete document.documentElement.dataset.theme;
+    for (const control of find(document, "[data-tag-theme]")) sync(control);
+  }
+  function current() {
+    const set = document.documentElement.dataset.theme;
+    if (set === "light" || set === "dark") return set;
+    return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function sync(control) {
+    if (control.matches("select")) control.value = document.documentElement.dataset.theme ?? "";
+    else control.setAttribute("aria-pressed", String(current() === "dark"));
+  }
+  function choose(theme) {
+    store.set(KEY, theme);
+    apply(theme);
+  }
+  function init19(root) {
+    if (once(document, "theme")) {
+      const saved = store.get(KEY);
+      if (saved !== null) apply(saved);
+    }
+    each(root, "select[data-tag-theme], button[data-tag-theme]", "theme", (control) => {
+      reveal(control);
+      sync(control);
+      if (control.matches("select")) control.addEventListener("change", () => choose(control.value));
+      else control.addEventListener("click", () => choose(current() === "dark" ? "light" : "dark"));
+    });
+  }
+
+  // src/behaviors/tabs.js
+  function init20(root) {
+    each(root, '[role="tablist"]', "tabs", (list) => {
+      const tabs = [...list.querySelectorAll('[role="tab"][aria-controls]')].filter((tab) => document.getElementById(tab.getAttribute("aria-controls")));
+      if (!tabs.length) return;
+      const panelOf = (tab) => document.getElementById(tab.getAttribute("aria-controls"));
+      const select = (chosen, focus) => {
+        for (const tab of tabs) {
+          const selected = tab === chosen;
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          panelOf(tab).hidden = !selected;
+        }
+        if (focus) chosen.focus();
+      };
+      for (const tab of tabs) {
+        if (tab.matches("button:not([type])")) tab.type = "button";
+        const panel = panelOf(tab);
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", idFor(tab, "tab"));
+        if (!panel.hasAttribute("tabindex")) panel.tabIndex = 0;
+        tab.addEventListener("click", () => select(tab, false));
+      }
+      list.addEventListener("keydown", (event) => {
+        const index = tabs.indexOf(document.activeElement);
+        if (index < 0) return;
+        const vertical = list.getAttribute("aria-orientation") === "vertical";
+        const keys = {
+          [vertical ? "ArrowDown" : "ArrowRight"]: index + 1,
+          [vertical ? "ArrowUp" : "ArrowLeft"]: index - 1,
+          Home: 0,
+          End: tabs.length - 1
+        };
+        if (!(event.key in keys)) return;
+        event.preventDefault();
+        select(tabs[(keys[event.key] + tabs.length) % tabs.length], true);
+      });
+      select(tabs.find((tab) => tab.getAttribute("aria-selected") === "true") ?? tabs[0], false);
+    });
+  }
+
+  // src/behaviors/match.js
+  function init21(root) {
+    each(root, "input[data-tag-match]", "match", (field) => {
+      const other = document.getElementById(field.dataset.tagMatch);
+      if (!other) return;
+      const name = other.labels?.[0]?.textContent.trim() || other.name || "the other field";
+      const check = () => field.setCustomValidity(field.value && field.value !== other.value ? `Doesn't match ${name}.` : "");
+      field.addEventListener("input", check, true);
+      other.addEventListener("input", () => {
+        const wasInvalid = !field.validity.valid;
+        check();
+        if (wasInvalid && field.validity.valid) field.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      check();
+    });
+  }
+
   // src/index.js
-  var behaviors = [init, init2, init3, init4, init5, init6, init7, init8, init9, init10, init11, init12, init13, init14, init15, init16, init17];
+  var behaviors = [init, init19, init2, init4, init5, init6, init21, init7, init8, init9, init10, init11, init12, init13, init14, init3, init15, init16, init17, init18, init20];
   var VERSION = "0.2.0";
-  function init18(root = document) {
+  function init22(root = document) {
     for (const behavior of behaviors) {
       try {
         behavior(root);
@@ -760,7 +943,7 @@
   function start() {
     if (document.documentElement.dataset.tagaction === "off") return;
     addStyles();
-    init18(document);
+    init22(document);
     new MutationObserver((records) => {
       const added = /* @__PURE__ */ new Set();
       for (const record of records) {
@@ -769,12 +952,12 @@
       for (const node of added) {
         let covered = false;
         for (let parent = node.parentElement; parent && !covered; parent = parent.parentElement) covered = added.has(parent);
-        if (!covered && node.isConnected) init18(node);
+        if (!covered && node.isConnected) init22(node);
       }
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
   if (typeof window !== "undefined" && !window.TagAction) {
-    window.TagAction = { init: init18, version: VERSION };
+    window.TagAction = { init: init22, version: VERSION };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
     else start();
   }

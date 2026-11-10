@@ -2,7 +2,7 @@
 
 import { each, h } from '../core.js';
 
-async function copy(text) {
+export async function copy(text) {
   try {
     await navigator.clipboard.writeText(text);
     return true;

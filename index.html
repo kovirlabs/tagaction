@@ -110,6 +110,18 @@
       <details name="faq" id="faq-htmx"><summary>Does it work with htmx?</summary><p>Yes. Content swapped in later is enhanced automatically.</p></details>
     </section>
 
+    <h2>Tabs, copy, and theme</h2>
+    <p>Tabs show one panel at a time; arrow keys move between them. Without JavaScript, every panel shows.</p>
+    <div role="tablist" aria-label="Install with">
+      <button role="tab" aria-controls="tab-cdn" aria-selected="true">CDN</button>
+      <button role="tab" aria-controls="tab-npm">npm</button>
+    </div>
+    <section id="tab-cdn" role="tabpanel"><pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer&gt;&lt;/script&gt;</code></pre></section>
+    <section id="tab-npm" role="tabpanel"><pre><code>npm install tagaction</code></pre></section>
+    <p><label for="demo-invite">Invite link</label></p>
+    <div role="group"><input id="demo-invite" value="https://example.com/join/4F7Q" readonly><button commandfor="demo-invite" command="--copy" hidden>Copy</button></div>
+    <p><select data-tag-theme aria-label="Color scheme" hidden><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></p>
+
     <h2>Images</h2>
     <figure>
       <a href="https://picsum.photos/id/1015/1600/900.jpg"><img src="https://picsum.photos/id/1015/800/450.jpg" alt="A river between mountains" width="800" height="450" loading="lazy"></a>

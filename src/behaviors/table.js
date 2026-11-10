@@ -4,7 +4,8 @@
 //   aria-sort. Numbers sort as numbers; <data value>, <time datetime>, and
 //   <meter>/<progress> values in a cell are used as its sort key.
 // - Filtering: <input type="search" aria-controls="table-id"> hides rows that
-//   don't contain every typed word. It also filters the <li>s of a list.
+//   don't contain every typed word. It also filters the <li>s of a list. A
+//   list written with `hidden` shows only while there's a search (results).
 
 import { each, h, reveal } from '../core.js';
 
@@ -39,8 +40,11 @@ function sort(table, header) {
   }
 }
 
+const results = new WeakSet(); // lists written hidden: shown only while there's a search
+
 function filter(control, target) {
   const words = control.value.toLowerCase().split(/\s+/).filter(Boolean);
+  if (results.has(target)) target.hidden = !words.length;
   const items = target.tBodies ? [...target.tBodies].flatMap((body) => [...body.rows]) : [...target.children].filter((child) => child.matches('li'));
   for (const item of items) {
     const text = item.textContent.toLowerCase();
@@ -64,6 +68,9 @@ export function init(root) {
   each(root, 'input[aria-controls]:is([type="search"], [type="text"], :not([type]))', 'filter', (control) => {
     const target = document.getElementById(control.getAttribute('aria-controls'));
     if (!target?.matches('table, ul, ol, menu')) return;
+    // A list written with `hidden` is a list of search results: it shows only
+    // while something is typed, like a site search over a list of every page.
+    if (target.hidden && !target.matches('table')) results.add(target);
     reveal(control);
     control.addEventListener('input', () => filter(control, target));
     if (control.value) filter(control, target);
