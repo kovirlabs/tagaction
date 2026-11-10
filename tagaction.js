@@ -874,11 +874,14 @@
     store.set(KEY, theme);
     apply(theme);
   }
+  function applySaved() {
+    if (!once(document, "theme")) return;
+    const saved = store.get(KEY);
+    if (saved !== null) apply(saved);
+  }
+  if (typeof document !== "undefined" && document.documentElement.dataset.tagaction !== "off") applySaved();
   function init19(root) {
-    if (once(document, "theme")) {
-      const saved = store.get(KEY);
-      if (saved !== null) apply(saved);
-    }
+    applySaved();
     each(root, "select[data-tag-theme], button[data-tag-theme]", "theme", (control) => {
       reveal(control);
       sync(control);

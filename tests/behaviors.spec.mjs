@@ -608,6 +608,20 @@ test.describe('theme switch', () => {
     await page.selectOption('#theme-select', '');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
   });
+
+  test('the saved theme is on <html> before the body is parsed, with the script in <head> without defer', async ({ page }) => {
+    await page.route(/tagaction@[^/]+\/tagaction(\.min)?\.js/, (route) => route.fulfill({ path: 'tagaction.js', contentType: 'text/javascript' }));
+    await page.route('https://example.test/theme.html', (route) => route.fulfill({ contentType: 'text/html', body: `<!doctype html><html lang="en"><head>
+      <script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js"></script></head>
+      <body><script>window.atFirstParse = document.documentElement.dataset.theme ?? null;</script>
+      <select data-tag-theme aria-label="Color scheme" hidden><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></body></html>` }));
+    await page.goto('https://example.test/theme.html');
+    expect(await page.evaluate(() => window.atFirstParse)).toBe(null);
+    await page.selectOption('select', 'dark');
+    await page.reload();
+    expect(await page.evaluate(() => window.atFirstParse)).toBe('dark');
+    await expect(page.locator('select')).toHaveValue('dark');
+  });
 });
 
 test.describe('tabs', () => {

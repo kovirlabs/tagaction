@@ -32,7 +32,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |
 | Tabs | Shows the selected panel; arrow keys, Home, End | `role="tablist"`, `role="tab"` with `aria-controls` |
-| Theme | Light/dark switch, remembered | `<select data-tag-theme>` or `<button data-tag-theme>` |
+| Theme | Light/dark switch, remembered (load the script without `defer` so the saved scheme applies before the first paint) | `<select data-tag-theme>` or `<button data-tag-theme>` |
 | Copy, share | Copy any field or element; share a link or section | `<button commandfor command="--copy">`, `command="--share"` |
 | `<output>` | Live value, total, or product; currency and percent formatting | native `for`; `data-tag-calc="product"`, `data-tag-format="USD"` |
 | `<abbr>` | Title shown on tap | `title` |
