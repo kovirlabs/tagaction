@@ -235,6 +235,34 @@ test.describe('textarea, file, password', () => {
     await expect(page.locator('#note + small + small[data-tag="count"]')).toHaveText('0 / 100');
   });
 
+  test('Ctrl+Enter or ⌘+Enter in a textarea sends its form, with validation', async ({ page }) => {
+    await open(page, 'form.html');
+    await page.getByLabel('Bio').fill('Hello');
+    await page.getByLabel('Bio').press('Control+Enter');
+    // requestSubmit runs validation: the empty required email is reported and focused.
+    await expect(page.getByLabel('Email')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel('Email')).toBeFocused();
+    await expect(page.getByLabel('Bio')).toHaveValue('Hello'); // no newline added
+
+    // A form added later sends with ⌘+Enter; plain Enter still types a newline.
+    await page.route('https://example.test/**', (route) => route.fulfill({ body: '<p>Sent</p>', contentType: 'text/html' }));
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<form id="reply" action="https://example.test/reply"><label for="reply-text">Reply</label><textarea id="reply-text" name="text"></textarea><button>Send</button></form>'));
+    const reply = page.getByLabel('Reply');
+    await reply.fill('Thanks');
+    await reply.press('Enter');
+    await expect(reply).toHaveValue('Thanks\n');
+    // Not while an input method is composing.
+    const composing = await reply.evaluate((el) => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, isComposing: true, cancelable: true, bubbles: true });
+      el.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    expect(composing).toBe(false);
+    await reply.press('Meta+Enter');
+    await expect(page.getByText('Sent')).toBeVisible();
+  });
+
   test('a textarea without rows grows as you type', async ({ page }) => {
     await open(page, 'widgets.html');
     const notes = page.getByLabel('Notes');

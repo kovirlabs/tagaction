@@ -442,6 +442,14 @@
       textarea.addEventListener("input", grow);
       if (textarea.value) requestAnimationFrame(grow);
     });
+    each(root, "textarea", "submit-key", (textarea) => {
+      textarea.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
+        if (event.isComposing || event.keyCode === 229 || !textarea.form || event.defaultPrevented) return;
+        event.preventDefault();
+        textarea.form.requestSubmit();
+      });
+    });
     each(root, "textarea[maxlength]", "count", (textarea) => {
       const max = textarea.maxLength;
       if (max < 0) return;

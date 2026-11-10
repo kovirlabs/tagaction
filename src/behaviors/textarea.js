@@ -2,6 +2,9 @@
 // - Grows as you type when it has no rows attribute. CSS field-sizing does this
 //   in browsers that support it (TagBrush.css uses it); this covers the rest.
 // - With maxlength, a counter ("12 / 280") follows the field.
+// - In a form, Ctrl+Enter (⌘+Enter on a Mac) sends it, through
+//   form.requestSubmit() so validation and submit handlers run. Not while an
+//   input method is composing text (isComposing, or keyCode 229 in Safari).
 
 import { each, h, idFor, addToken } from '../core.js';
 
@@ -16,6 +19,15 @@ export function init(root) {
     };
     textarea.addEventListener('input', grow);
     if (textarea.value) requestAnimationFrame(grow);
+  });
+
+  each(root, 'textarea', 'submit-key', (textarea) => {
+    textarea.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
+      if (event.isComposing || event.keyCode === 229 || !textarea.form || event.defaultPrevented) return;
+      event.preventDefault();
+      textarea.form.requestSubmit();
+    });
   });
 
   each(root, 'textarea[maxlength]', 'count', (textarea) => {
