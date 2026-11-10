@@ -20,6 +20,9 @@ const CSS = `@layer tagaction {
 :where([data-tag="files"]) { text-align: start; }
 :where([data-tag="count"][data-tag-low]) { color: var(--color-error, #b91c1c); }
 :where([data-tag="error"]) { display: block; color: var(--color-error, #b91c1c); }
+:where([data-tag="password"]:has(+ small)) { margin-bottom: 0; }
+:where([data-tag="password"] + small) { display: block; margin-top: var(--spacing-xs, 0.25rem); margin-bottom: var(--spacing-md, 1rem); color: var(--color-text-muted, GrayText); }
+:where([data-tag="password"]:has([aria-invalid="true"], :user-invalid) + small) { color: var(--color-error, #b91c1c); }
 :where([data-tag="abbr"]) { font-size: inherit; color: var(--color-text-muted, inherit); }
 :where([data-tag-drop]) { outline: 2px dashed var(--color-primary, Highlight); outline-offset: 2px; }
 :where(img[data-tag="zoom"]) { cursor: zoom-in; }

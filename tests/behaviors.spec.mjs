@@ -138,6 +138,20 @@ test.describe('form', () => {
     await expect(page.locator('[data-tag="password"] + small')).not.toHaveText('At least 8 characters.');
   });
 
+  test('help text after a password field stays under the Show/Hide row, as on the sign-up page', async ({ page }) => {
+    await open(page, 'form.html');
+    const row = await page.locator('[data-tag="password"]').boundingBox();
+    const help = page.locator('[data-tag="password"] + small');
+    await expect(help).toHaveText('At least 8 characters.');
+    const box = await help.boundingBox();
+    expect(await help.evaluate((el) => getComputedStyle(el).display)).toBe('block');
+    expect(box.y).toBeGreaterThanOrEqual(row.y + row.height);
+    expect(Math.round(box.x)).toBe(Math.round(row.x));
+    // The next label starts on its own line below the help text.
+    const next = await page.locator('label:has([name="terms"])').boundingBox();
+    expect(next.y).toBeGreaterThanOrEqual(box.y + box.height);
+  });
+
   test('the submit button is disabled and busy while the form is sent', async ({ page }) => {
     await open(page, 'form.html');
     await page.route('https://example.test/**', (route) => setTimeout(() => route.fulfill({ body: '<p>Done</p>', contentType: 'text/html' }).catch(() => {}), 500));
