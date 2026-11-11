@@ -35,16 +35,28 @@ const isNumber = (cell) => {
   return ALIGNED.test(data ? data.getAttribute('value') : cell.textContent.trim());
 };
 
-// Mark the columns where every non-empty body cell is a number.
-function markNumbers(table, headerRow) {
-  const rows = [...table.tBodies].flatMap((body) => [...body.rows]);
-  if (!rows.length || rows.some((row) => [...row.cells].some((cell) => cell.colSpan > 1))) return;
+// Mark the columns where every non-empty body cell is a number. A column
+// once marked stays marked, and rows added later (a --clone row, an htmx
+// swap) get the mark in it whatever they hold. Rows with a colspan are skipped.
+function markNumbers(table) {
+  const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
+  if (!headerRow) return;
+  const rows = [...table.tBodies].flatMap((body) => [...body.rows]).filter((row) => ![...row.cells].some((cell) => cell.colSpan > 1));
+  if (!rows.length) return;
   [...headerRow.cells].forEach((th, index) => {
     if (th.colSpan > 1) return;
     const cells = rows.map((row) => row.cells[index]).filter((cell) => cell && cell.textContent.trim());
-    if (!cells.length || !cells.every(isNumber)) return;
+    if (th.dataset.tag !== 'num' && (!cells.length || !cells.every(isNumber))) return;
     for (const cell of [th, ...cells]) if (!cell.dataset.tag) cell.dataset.tag = 'num';
   });
+}
+
+// Every row added (at load or later) asks for its table to be checked once,
+// after the current batch of additions.
+const pending = new Set();
+function schedule(table) {
+  if (!pending.size) queueMicrotask(() => { for (const t of pending) markNumbers(t); pending.clear(); });
+  pending.add(table);
 }
 
 function compare(a, b) {
@@ -101,7 +113,6 @@ export function init(root) {
   each(root, 'table', 'table', (table) => {
     const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
     if (!headerRow) return;
-    markNumbers(table, headerRow);
     if (![...table.tBodies].some((body) => body.rows.length > 1)) return;
     for (const th of headerRow.cells) {
       if (th.tagName !== 'TH' || th.colSpan > 1 || th.dataset.tagaction === 'off' || !th.textContent.trim()) continue;
@@ -110,6 +121,11 @@ export function init(root) {
       th.append(button);
       button.addEventListener('click', () => sort(table, th));
     }
+  });
+
+  each(root, 'tbody > tr', 'num-row', (row) => {
+    const table = row.closest('table');
+    if (table?.tHead && !table.closest('[data-tagaction="off"]')) schedule(table);
   });
 
   each(root, 'input[aria-controls]:is([type="search"], [type="text"], :not([type]))', 'filter', (control) => {

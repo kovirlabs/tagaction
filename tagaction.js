@@ -265,15 +265,25 @@
     const data = cell.querySelector("data[value]");
     return ALIGNED.test(data ? data.getAttribute("value") : cell.textContent.trim());
   };
-  function markNumbers(table, headerRow) {
-    const rows2 = [...table.tBodies].flatMap((body) => [...body.rows]);
-    if (!rows2.length || rows2.some((row) => [...row.cells].some((cell) => cell.colSpan > 1))) return;
+  function markNumbers(table) {
+    const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
+    if (!headerRow) return;
+    const rows2 = [...table.tBodies].flatMap((body) => [...body.rows]).filter((row) => ![...row.cells].some((cell) => cell.colSpan > 1));
+    if (!rows2.length) return;
     [...headerRow.cells].forEach((th, index) => {
       if (th.colSpan > 1) return;
       const cells = rows2.map((row) => row.cells[index]).filter((cell) => cell && cell.textContent.trim());
-      if (!cells.length || !cells.every(isNumber)) return;
+      if (th.dataset.tag !== "num" && (!cells.length || !cells.every(isNumber))) return;
       for (const cell of [th, ...cells]) if (!cell.dataset.tag) cell.dataset.tag = "num";
     });
+  }
+  var pending = /* @__PURE__ */ new Set();
+  function schedule(table) {
+    if (!pending.size) queueMicrotask(() => {
+      for (const t of pending) markNumbers(t);
+      pending.clear();
+    });
+    pending.add(table);
   }
   function compare(a, b) {
     if (NUMBER.test(a) && NUMBER.test(b)) {
@@ -324,7 +334,6 @@
     each(root, "table", "table", (table) => {
       const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
       if (!headerRow) return;
-      markNumbers(table, headerRow);
       if (![...table.tBodies].some((body) => body.rows.length > 1)) return;
       for (const th of headerRow.cells) {
         if (th.tagName !== "TH" || th.colSpan > 1 || th.dataset.tagaction === "off" || !th.textContent.trim()) continue;
@@ -333,6 +342,10 @@
         th.append(button);
         button.addEventListener("click", () => sort(table, th));
       }
+    });
+    each(root, "tbody > tr", "num-row", (row) => {
+      const table = row.closest("table");
+      if (table?.tHead && !table.closest('[data-tagaction="off"]')) schedule(table);
     });
     each(root, 'input[aria-controls]:is([type="search"], [type="text"], :not([type]))', "filter", (control) => {
       const target = document.getElementById(control.getAttribute("aria-controls"));

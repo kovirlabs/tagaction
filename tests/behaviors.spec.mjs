@@ -96,6 +96,20 @@ test.describe('table', () => {
     await expect(page.locator('#aligned tbody td:nth-child(3)[data-tag="num"]')).toHaveCount(2);
   });
 
+  test('rows added later line up in number columns, and a late non-number does not un-mark a column', async ({ page }) => {
+    await open(page, 'table.html');
+    await expect(page.locator('#numbers th[data-tag="num"]')).toHaveText('Count');
+    await page.evaluate(() => document.querySelector('#numbers tbody').insertAdjacentHTML('beforeend', '<tr><td>d</td><td>7</td></tr><tr><td>e</td><td>—</td></tr>'));
+    await expect(page.locator('#numbers tbody td:nth-child(2)[data-tag="num"]')).toHaveCount(5);
+    await expect(page.locator('#numbers th[data-tag="num"]')).toHaveText('Count');
+    await expect(page.locator('#numbers tbody td:nth-child(1)[data-tag="num"]')).toHaveCount(0);
+    // A table that starts with no rows (rows come from --clone or htmx) is checked when they arrive.
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<table id="empty"><thead><tr><th>Item</th><th>Price</th></tr></thead><tbody></tbody></table>'));
+    await page.evaluate(() => document.querySelector('#empty tbody').insertAdjacentHTML('beforeend', '<tr><td>Tea</td><td>$4</td></tr>'));
+    await expect(page.locator('#empty th[data-tag="num"]')).toHaveText('Price');
+  });
+
   test('a table added later gets its number columns marked', async ({ page }) => {
     await open(page, 'table.html');
     await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
