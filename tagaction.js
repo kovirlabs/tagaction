@@ -259,7 +259,7 @@
     if (valued) return valued.getAttribute("value") ?? valued.getAttribute("datetime") ?? "";
     return cell.textContent.trim();
   }
-  var ALIGNED = /^\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}$/u;
+  var ALIGNED = /^(?:[-−+]?\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}|\(\p{Sc}?\s*\d[\d,\s]*(\.\d+)?\))$/u;
   var isNumber = (cell) => {
     if (cell.querySelector("time, meter, progress")) return false;
     const data = cell.querySelector("data[value]");

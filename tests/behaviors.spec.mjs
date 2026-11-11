@@ -82,7 +82,7 @@ test.describe('table', () => {
     const align = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).textAlign);
     const nums = (table) => page.locator(`#${table} thead th`).evaluateAll((els) => els.map((el) => el.dataset.tag === 'num'));
     expect(await nums('orders')).toEqual([false, true, false, false]); // <data value>; dates and names are not numbers
-    expect(await nums('aligned')).toEqual([false, false, true, true, false, true]); // "#1042" is an id // an empty cell doesn't count against a column
+    expect(await nums('aligned')).toEqual([false, false, true, true, false, true, true]); // "−$5.00", "-$12.50", "($3.00)" are amounts // "#1042" is an id // an empty cell doesn't count against a column
     expect(await align('#aligned thead th:nth-child(3)')).toBe('end');
     expect(await align('#aligned tbody td:nth-child(3)')).toBe('end');
     expect(await page.locator('#aligned tbody td:nth-child(3)').first().evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toBe('tabular-nums');

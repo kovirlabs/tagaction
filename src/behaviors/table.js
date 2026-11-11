@@ -26,9 +26,10 @@ function sortKey(cell) {
   return cell.textContent.trim();
 }
 
-// Stricter than the sort's test: only a currency sign may lead, not a letter
-// or a "#" ("Q1", "Mar 2", "#1042" are labels).
-const ALIGNED = /^\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}$/u;
+// Stricter than the sort's test: only a sign and a currency sign may lead,
+// not a letter or a "#" ("Q1", "Mar 2", "#1042" are labels). "−$5.00",
+// "-$5.00", "$-5", and an accounting "($5.00)" are numbers.
+const ALIGNED = /^(?:[-−+]?\p{Sc}?\s*[-−+]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}|\(\p{Sc}?\s*\d[\d,\s]*(\.\d+)?\))$/u;
 const isNumber = (cell) => {
   if (cell.querySelector('time, meter, progress')) return false;
   const data = cell.querySelector('data[value]');
