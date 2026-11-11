@@ -11,6 +11,11 @@ const CSS = `@layer tagaction {
 :where([data-tag="num"]:not([align])) { text-align: end; font-variant-numeric: tabular-nums; }
 :where([data-tag="filter-status"]:not([data-tag-empty])) { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 :where([data-tag="filter-status"][data-tag-empty]) { padding-block: 0.5rem; color: var(--color-text-muted, GrayText); }
+@supports (position-area: block-end) {
+:where(:has(> [data-tag="dropdown"])) { anchor-scope: --tag-dropdown; }
+:where(:has(> [data-tag="dropdown"]) > [aria-controls][aria-expanded]) { anchor-name: --tag-dropdown; }
+:where([data-tag="dropdown"]:not([hidden])) { position: fixed; position-anchor: --tag-dropdown; inset: auto; position-area: block-end span-inline-start; position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline; }
+}
 :where([data-tag="sort"]) { all: unset; display: inline-flex; align-items: center; gap: 0.35em; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }
 :where([data-tag="sort"]):focus-visible { outline: 2px solid var(--color-primary, Highlight); outline-offset: 2px; border-radius: 2px; }
 :where([data-tag="sort"])::after { content: "↕" / ""; opacity: 0.45; font-size: 0.85em; }

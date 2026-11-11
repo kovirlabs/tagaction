@@ -544,6 +544,24 @@ test.describe('menus', () => {
     await expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('a dropdown list stays on screen: under its button, flipping up near the bottom edge', async ({ page, browserName }) => {
+    await open(page, 'menu.html', { width: 700, height: 330 });
+    test.skip(!(await page.evaluate(() => CSS.supports('position-area: block-end'))), `${browserName}: no anchor positioning; the list keeps its place under the button`);
+    const box = (sel) => page.locator(sel).boundingBox();
+    await page.getByRole('button', { name: 'Account' }).click();
+    let [button, list] = [await box('[aria-controls="account"]'), await box('#account')];
+    expect(list.y).toBeGreaterThanOrEqual(button.y + button.height - 1);
+    expect(list.x + list.width).toBeLessThanOrEqual(700);
+    expect(list.x).toBeGreaterThan(300); // under the button at the end of the bar, not at the start
+    expect(list.x).toBeGreaterThanOrEqual(0);
+    await page.keyboard.press('Escape');
+    // A dropdown at the bottom of the window opens upward.
+    await page.locator('[aria-controls="lang"]').evaluate((el) => el.scrollIntoView({ block: 'end' }));
+    await page.getByRole('button', { name: 'Language' }).click();
+    [button, list] = [await box('[aria-controls="lang"]'), await box('#lang')];
+    expect(list.y + list.height).toBeLessThanOrEqual(button.y + 1);
+  });
+
   test('keyboard: ArrowDown opens and moves, Escape closes and returns focus', async ({ page }) => {
     await open(page, 'menu.html');
     const button = page.getByRole('button', { name: 'Account' });
