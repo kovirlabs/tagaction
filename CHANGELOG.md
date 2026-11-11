@@ -20,6 +20,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - A filter box that matches nothing says so: a `role="status"` line after the table or list reads "No matches for “x”" instead of leaving an empty table, and otherwise tells screen readers how many rows show ("3 of 12 shown") while staying out of sight. The count is written after a 400 ms pause in typing, so it isn't announced on every keystroke.
 - A dropdown list in a nav stays on screen: it is anchored to its button with CSS anchor positioning and flips up or to the other side near an edge, where `position-area` is supported (otherwise it keeps its place under the button).
 - Keyboard shortcuts from `aria-keyshortcuts`: the key it names focuses a field (`"/"` for search) or clicks a button (`"Control+K Meta+K"`). Keys without Control, Alt, or Meta are ignored while you type in a field; hidden and disabled elements are skipped.
+- `<input type="file" accept="image/*">` shows a thumbnail of each chosen picture in its file list (object URLs, revoked when the choice changes).
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

@@ -329,6 +329,28 @@ test.describe('textarea, file, password', () => {
     await expect(page.locator('#docs + small[data-tag="files"]')).toHaveText('dropped.pdf');
   });
 
+  test('an image file input shows a thumbnail of the chosen picture, and frees it when the choice changes', async ({ page }) => {
+    await open(page, 'form.html');
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await page.evaluate(() => { window.revoked = []; const revoke = URL.revokeObjectURL; URL.revokeObjectURL = (url) => { window.revoked.push(url); revoke(url); }; });
+    await page.getByLabel('Avatar').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: png });
+    const list = page.locator('#avatar + small[data-tag="files"]');
+    await expect(list).toHaveText('me.png');
+    const thumb = list.locator('img[data-tag="thumb"]');
+    await expect(thumb).toHaveAttribute('alt', '');
+    const first = await thumb.getAttribute('src');
+    expect(first).toMatch(/^blob:/);
+    expect(await thumb.evaluate((img) => img.complete && img.naturalWidth)).toBe(1);
+    await page.getByLabel('Avatar').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+    await expect(list).toHaveText('notes.txt');
+    await expect(list.locator('img')).toHaveCount(0);
+    expect(await page.evaluate(() => window.revoked)).toContain(first);
+    // False match: a single file input that doesn't accept images gets no list.
+    await page.evaluate(() => document.querySelector('form').insertAdjacentHTML('beforeend', '<input type="file" id="cv" aria-label="CV" accept=".pdf">'));
+    await page.locator('#cv').setInputFiles({ name: 'cv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') });
+    await expect(page.locator('#cv + small')).toHaveCount(0);
+  });
+
   test('a password field gets a labeled Show/Hide toggle', async ({ page }) => {
     await open(page, 'form.html');
     const field = page.getByLabel('Password', { exact: true });

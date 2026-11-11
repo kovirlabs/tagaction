@@ -26,6 +26,7 @@ const CSS = `@layer tagaction {
 @media (hover: none) { :where([data-tag="anchor"]) { opacity: 1; } }
 :where([data-tag="count"], [data-tag="files"]) { display: block; text-align: end; color: var(--color-text-muted, GrayText); }
 :where([data-tag="files"]) { text-align: start; }
+:where([data-tag="thumb"]) { display: inline-block; width: auto; height: 3rem; max-width: 6rem; margin: 0.25rem 0.5rem 0.25rem 0; object-fit: cover; vertical-align: middle; border-radius: var(--border-radius, 0.25rem); }
 :where([data-tag="count"][data-tag-low]) { color: var(--color-error, #b91c1c); }
 :where([data-tag="error"]) { display: block; color: var(--color-error, #b91c1c); }
 :where([data-tag="password"]:has(+ small)) { margin-bottom: 0; }
