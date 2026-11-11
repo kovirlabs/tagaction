@@ -582,6 +582,29 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await expect(page.locator('#q2')).toHaveAttribute('open', '');
   });
 
+  test('pictures in one section form a set: Previous/Next and the arrow keys step through it', async ({ page }) => {
+    await open(page, 'widgets.html');
+    const viewer = page.locator('dialog[data-tag="viewer"]');
+    await page.getByRole('link', { name: 'Second square' }).click();
+    await expect(viewer.locator('output')).toHaveText('2 of 3');
+    await expect(viewer.locator('img')).toHaveAttribute('alt', 'Second square');
+    await expect(viewer.locator('figcaption')).toHaveText('Second');
+    // Mouse: the buttons step and don't close the viewer.
+    await viewer.getByRole('button', { name: 'Next picture' }).click();
+    await expect(viewer.locator('img')).toHaveAttribute('alt', 'Third square');
+    await expect(viewer).toHaveAttribute('aria-label', 'Third square');
+    // Keyboard: arrows wrap around the set.
+    await page.keyboard.press('ArrowRight');
+    await expect(viewer.locator('output')).toHaveText('1 of 3');
+    await page.keyboard.press('ArrowLeft');
+    await expect(viewer.locator('figcaption')).toHaveText('Third');
+    await page.keyboard.press('Escape');
+    await expect(viewer).toHaveCount(0);
+    // A picture on its own (not in a set) gets no stepping buttons.
+    await page.getByRole('link', { name: 'A big orange square' }).click();
+    await expect(viewer.getByRole('button', { name: 'Next picture' })).toHaveCount(0);
+  });
+
   test('a link to an image opens it in a viewer; so does a shrunk figure image', async ({ page }) => {
     await open(page, 'widgets.html');
     await page.getByRole('link', { name: 'A big orange square' }).click();

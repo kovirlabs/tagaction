@@ -29,7 +29,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<time>` | Reader's timezone; "3 hours ago" | `datetime` with a zone; `data-tag-time="relative"` |
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
-| `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
+| `<img>` | Click to enlarge; step through the pictures of a figure or section | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |
 | Tabs | Shows the selected panel; arrow keys, Home, End; find-in-page and `#panel` links select a tab | `role="tablist"`, `role="tab"` with `aria-controls` |
 | Selectable rows | A header checkbox selects all shown rows, goes mixed, Shift-click selects a range | `<th><input type="checkbox">` |

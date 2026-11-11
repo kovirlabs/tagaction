@@ -28,6 +28,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - Tabs: hidden panels use `hidden="until-found"` where supported, so find-in-page reaches their text and `beforematch` selects their tab; a link to a panel or to anything in it selects its tab, on load and when the `#fragment` changes.
 - The first invalid field is scrolled to the middle of the window when it's focused, so a sticky top bar (TagBrush.css's `<header data-layout="sticky">`) never covers it; WebKit's own focus scroll can stop a few pixels under one.
 - Under `data-tag-remember`, a table with an `id` keeps its sort column and direction across visits, as `<details>` keep their open state.
+- The image viewer steps through a set: pictures in the same `<figure>`, or else the same `<section>`, get Previous and Next buttons, a "2 of 5" count, and the arrow keys. A picture on its own is unchanged.
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

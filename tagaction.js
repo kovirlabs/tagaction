@@ -1,7 +1,7 @@
 /*! TagAction v0.2.0 | Apache-2.0 | https://github.com/kovirlabs/tagaction | tested with TagBrush.css 1.2.0 */
 (() => {
   // src/styles.js
-  var CSS2 = `@layer tagaction{:where([data-tag="code"]){position:relative}:where([data-tag="code"]>pre){padding-inline-end:5rem}:where([data-tag="copy"]){position:absolute;top:0.4rem;right:0.4rem;margin:0;padding:0.15rem 0.6rem;font-size:0.8rem;line-height:1.5;background:var(--color-surface,Canvas)}:where(:has(>[data-tag="dropdown"])){position:relative}:where([data-tag="dropdown"]:not([hidden])){position:absolute;z-index:10;top:100%;right:0;min-width:12rem;margin:0.25rem 0 0;padding:0.5rem;display:flex;flex-direction:column;align-items:stretch;gap:0.25rem;list-style:none;background:var(--color-surface,Canvas);border:1px solid var(--color-border,GrayText);border-radius:var(--border-radius,0.5rem);box-shadow:0 8px 24px rgb(0 0 0 / 0.15)}:where([data-tag="num"]:not([align])){text-align:end;font-variant-numeric:tabular-nums}:where([data-tag="filter-status"]:not([data-tag-empty])){position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}:where([data-tag="filter-status"][data-tag-empty]){padding-block:0.5rem;color:var(--color-text-muted,GrayText)}@supports (position-area:block-end){:where(:has(>[data-tag="dropdown"])){anchor-scope:--tag-dropdown}:where(:has(>[data-tag="dropdown"])>[aria-controls][aria-expanded]){anchor-name:--tag-dropdown}:where([data-tag="dropdown"]:not([hidden])){position:fixed;position-anchor:--tag-dropdown;inset:auto;position-area:block-end span-inline-start;position-try-fallbacks:flip-inline,flip-block,flip-block flip-inline}}::highlight(tagaction-match){background-color:var(--color-highlight,Mark);color:var(--color-text,MarkText);text-decoration:underline}:where([data-tag="sort"]){all:unset;display:inline-flex;align-items:center;gap:0.35em;cursor:pointer;font:inherit;color:inherit;text-align:inherit}:where([data-tag="sort"]):focus-visible{outline:2px solid var(--color-primary,Highlight);outline-offset:2px;border-radius:2px}:where([data-tag="sort"])::after{content:"\u2195" / "";opacity:0.45;font-size:0.85em}:where([aria-sort="ascending"]>[data-tag="sort"])::after{content:"\u2191" / "";opacity:1}:where([aria-sort="descending"]>[data-tag="sort"])::after{content:"\u2193" / "";opacity:1}:where([data-tag="anchor"]){margin-inline-start:0.35em;color:var(--color-text-muted,GrayText);text-decoration:none;font-weight:normal;opacity:0}:where(:hover>[data-tag="anchor"],[data-tag="anchor"]:focus-visible){opacity:1}@media (hover:none){:where([data-tag="anchor"]){opacity:1}}:where([data-tag="count"],[data-tag="files"]){display:block;text-align:end;color:var(--color-text-muted,GrayText)}:where([data-tag="files"]){text-align:start}:where([data-tag="thumb"]){display:inline-block;width:auto;height:3rem;max-width:6rem;margin:0.25rem 0.5rem 0.25rem 0;object-fit:cover;vertical-align:middle;border-radius:var(--border-radius,0.25rem)}:where([data-tag="count"][data-tag-low]){color:var(--color-error,#b91c1c)}:where([data-tag="error"]){display:block;color:var(--color-error,#b91c1c)}:where([data-tag="password"]:has(+ small)){margin-bottom:0}:where([data-tag="password"] + small){display:block;margin-top:var(--spacing-xs,0.25rem);margin-bottom:var(--spacing-md,1rem);color:var(--color-text-muted,GrayText)}:where([data-tag="password"]:has([aria-invalid="true"],:user-invalid) + small){color:var(--color-error,#b91c1c)}:where([data-tag="abbr"]){font-size:inherit;color:var(--color-text-muted,inherit)}:where([data-tag-drop]){outline:2px dashed var(--color-primary,Highlight);outline-offset:2px}:where(img[data-tag="zoom"]){cursor:zoom-in}:where(abbr[title][tabindex]){cursor:help}:where([data-tag="viewer"]){max-width:95vw;max-height:95vh;padding:0.5rem}:where([data-tag="viewer"] form){display:flex;justify-content:end;margin:0}:where([data-tag="viewer"] figure){margin:0;cursor:zoom-out}:where([data-tag="viewer"] img){display:block;max-width:100%;max-height:80vh;margin:auto;object-fit:contain}}`;
+  var CSS2 = `@layer tagaction{:where([data-tag="code"]){position:relative}:where([data-tag="code"]>pre){padding-inline-end:5rem}:where([data-tag="copy"]){position:absolute;top:0.4rem;right:0.4rem;margin:0;padding:0.15rem 0.6rem;font-size:0.8rem;line-height:1.5;background:var(--color-surface,Canvas)}:where(:has(>[data-tag="dropdown"])){position:relative}:where([data-tag="dropdown"]:not([hidden])){position:absolute;z-index:10;top:100%;right:0;min-width:12rem;margin:0.25rem 0 0;padding:0.5rem;display:flex;flex-direction:column;align-items:stretch;gap:0.25rem;list-style:none;background:var(--color-surface,Canvas);border:1px solid var(--color-border,GrayText);border-radius:var(--border-radius,0.5rem);box-shadow:0 8px 24px rgb(0 0 0 / 0.15)}:where([data-tag="num"]:not([align])){text-align:end;font-variant-numeric:tabular-nums}:where([data-tag="filter-status"]:not([data-tag-empty])){position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}:where([data-tag="filter-status"][data-tag-empty]){padding-block:0.5rem;color:var(--color-text-muted,GrayText)}@supports (position-area:block-end){:where(:has(>[data-tag="dropdown"])){anchor-scope:--tag-dropdown}:where(:has(>[data-tag="dropdown"])>[aria-controls][aria-expanded]){anchor-name:--tag-dropdown}:where([data-tag="dropdown"]:not([hidden])){position:fixed;position-anchor:--tag-dropdown;inset:auto;position-area:block-end span-inline-start;position-try-fallbacks:flip-inline,flip-block,flip-block flip-inline}}::highlight(tagaction-match){background-color:var(--color-highlight,Mark);color:var(--color-text,MarkText);text-decoration:underline}:where([data-tag="sort"]){all:unset;display:inline-flex;align-items:center;gap:0.35em;cursor:pointer;font:inherit;color:inherit;text-align:inherit}:where([data-tag="sort"]):focus-visible{outline:2px solid var(--color-primary,Highlight);outline-offset:2px;border-radius:2px}:where([data-tag="sort"])::after{content:"\u2195" / "";opacity:0.45;font-size:0.85em}:where([aria-sort="ascending"]>[data-tag="sort"])::after{content:"\u2191" / "";opacity:1}:where([aria-sort="descending"]>[data-tag="sort"])::after{content:"\u2193" / "";opacity:1}:where([data-tag="anchor"]){margin-inline-start:0.35em;color:var(--color-text-muted,GrayText);text-decoration:none;font-weight:normal;opacity:0}:where(:hover>[data-tag="anchor"],[data-tag="anchor"]:focus-visible){opacity:1}@media (hover:none){:where([data-tag="anchor"]){opacity:1}}:where([data-tag="count"],[data-tag="files"]){display:block;text-align:end;color:var(--color-text-muted,GrayText)}:where([data-tag="files"]){text-align:start}:where([data-tag="thumb"]){display:inline-block;width:auto;height:3rem;max-width:6rem;margin:0.25rem 0.5rem 0.25rem 0;object-fit:cover;vertical-align:middle;border-radius:var(--border-radius,0.25rem)}:where([data-tag="count"][data-tag-low]){color:var(--color-error,#b91c1c)}:where([data-tag="error"]){display:block;color:var(--color-error,#b91c1c)}:where([data-tag="password"]:has(+ small)){margin-bottom:0}:where([data-tag="password"] + small){display:block;margin-top:var(--spacing-xs,0.25rem);margin-bottom:var(--spacing-md,1rem);color:var(--color-text-muted,GrayText)}:where([data-tag="password"]:has([aria-invalid="true"],:user-invalid) + small){color:var(--color-error,#b91c1c)}:where([data-tag="abbr"]){font-size:inherit;color:var(--color-text-muted,inherit)}:where([data-tag-drop]){outline:2px dashed var(--color-primary,Highlight);outline-offset:2px}:where(img[data-tag="zoom"]){cursor:zoom-in}:where(abbr[title][tabindex]){cursor:help}:where([data-tag="viewer"]){max-width:95vw;max-height:95vh;padding:0.5rem}:where([data-tag="viewer"] form){display:flex;justify-content:end;align-items:center;gap:0.5rem;margin:0}:where([data-tag="viewer"] output){margin-inline-end:auto;font-variant-numeric:tabular-nums}:where([data-tag="viewer"] figure){margin:0;cursor:zoom-out}:where([data-tag="viewer"] img){display:block;max-width:100%;max-height:80vh;margin:auto;object-fit:contain}}`;
   function addStyles() {
     try {
       const sheet = new CSSStyleSheet();
@@ -790,18 +790,56 @@
 
   // src/behaviors/img.js
   var IMAGE_FILE = /\.(avif|gif|jpe?g|png|svg|webp)(\?.*)?$/i;
-  function view(src, image) {
-    const dialog = h("dialog", { "data-tag": "viewer", "aria-label": image.alt || "Image" });
+  var viewables = /* @__PURE__ */ new Map();
+  function setOf(element) {
+    const all = [...viewables.keys()].filter((item) => item.isConnected && (item.dataset.tag === "zoom" || item.matches("a")));
+    for (const container of [element.closest("figure"), element.closest("section")]) {
+      const members = container ? all.filter((item) => container.contains(item)) : [];
+      if (members.length > 1) return members.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+    }
+    return [element];
+  }
+  function view(element) {
+    const set2 = setOf(element);
+    let index = set2.indexOf(element);
+    const dialog = h("dialog", { "data-tag": "viewer" });
     const form = h("form", { method: "dialog" });
     form.append(h("button", { "aria-label": "Close" }, "\u2715"));
     const figure = h("figure");
-    figure.append(h("img", { src, alt: image.alt }));
-    const caption = image.closest("figure")?.querySelector("figcaption");
-    if (caption) figure.append(caption.cloneNode(true));
+    const picture = h("img");
+    figure.append(picture);
+    const show2 = (step) => {
+      index = (index + step + set2.length) % set2.length;
+      const item = set2[index];
+      const image = item.matches("img") ? item : item.querySelector("img");
+      picture.src = viewables.get(item)();
+      picture.alt = image.alt;
+      dialog.setAttribute("aria-label", image.alt || "Image");
+      figure.querySelector("figcaption")?.remove();
+      const caption = image.closest("figure")?.querySelector("figcaption");
+      if (caption) figure.append(caption.cloneNode(true));
+      if (counter2) counter2.textContent = `${index + 1} of ${set2.length}`;
+    };
+    let counter2 = null;
+    if (set2.length > 1) {
+      const previous = h("button", { type: "button", "aria-label": "Previous picture" }, "\u2190");
+      const next = h("button", { type: "button", "aria-label": "Next picture" }, "\u2192");
+      counter2 = h("output", { "aria-live": "polite" });
+      previous.addEventListener("click", () => show2(-1));
+      next.addEventListener("click", () => show2(1));
+      form.prepend(counter2, previous, next);
+      dialog.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          show2(event.key === "ArrowLeft" ? -1 : 1);
+        }
+      });
+    }
+    show2(0);
     dialog.append(form, figure);
     dialog.addEventListener("close", () => dialog.remove());
     dialog.addEventListener("click", (event) => {
-      if (event.target.closest("figure, dialog") && event.detail) dialog.close();
+      if (event.detail && !event.target.closest("form") && event.target.closest("figure, dialog")) dialog.close();
     });
     document.body.append(dialog);
     dialog.showModal();
@@ -811,10 +849,11 @@
     each(root, "a[href]:has(> img:only-child)", "zoom-link", (link) => {
       if (!IMAGE_FILE.test(new URL(link.href).pathname)) return;
       link.setAttribute("aria-haspopup", "dialog");
+      viewables.set(link, () => link.href);
       link.addEventListener("click", (event) => {
         if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        view(link.href, link.querySelector("img"));
+        view(link);
       });
     });
     each(root, "figure img", "zoom", (image) => {
@@ -826,7 +865,8 @@
       };
       if (image.complete) setup();
       else image.addEventListener("load", setup, { once: true });
-      const open = () => image.dataset.tag === "zoom" && view(image.currentSrc || image.src, image);
+      viewables.set(image, () => image.currentSrc || image.src);
+      const open = () => image.dataset.tag === "zoom" && view(image);
       image.addEventListener("click", open);
       image.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {

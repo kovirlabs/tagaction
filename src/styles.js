@@ -38,7 +38,8 @@ const CSS = `@layer tagaction {
 :where(img[data-tag="zoom"]) { cursor: zoom-in; }
 :where(abbr[title][tabindex]) { cursor: help; }
 :where([data-tag="viewer"]) { max-width: 95vw; max-height: 95vh; padding: 0.5rem; }
-:where([data-tag="viewer"] form) { display: flex; justify-content: end; margin: 0; }
+:where([data-tag="viewer"] form) { display: flex; justify-content: end; align-items: center; gap: 0.5rem; margin: 0; }
+:where([data-tag="viewer"] output) { margin-inline-end: auto; font-variant-numeric: tabular-nums; }
 :where([data-tag="viewer"] figure) { margin: 0; cursor: zoom-out; }
 :where([data-tag="viewer"] img) { display: block; max-width: 100%; max-height: 80vh; margin: auto; object-fit: contain; }
 }`;
