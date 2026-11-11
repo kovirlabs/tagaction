@@ -39,6 +39,7 @@ Add this to `<head>` (with or without TagBrush.css, which it is designed to sit 
 - `<abbr title="HyperText Markup Language">HTML</abbr>`: tapping it shows the title in brackets, for touch screens.
 - `<menu>` and popover menus (`<div popover><nav><ul>…</ul></nav></div>`): arrow keys, Home, and End move between the items. A popover holding links (a phone menu) closes when one is followed.
 - Dropdown menu in the top bar: `<li><details><summary>Services</summary><ul><li><a href="/grants">Grants</a></li></ul></details></li>` in the page header's `<nav>` closes on Escape, a click outside, or a chosen link; arrow keys move through it.
+- Printing opens every `<details>` (an FAQ prints with its answers) and closes them again afterwards.
 - A link to something inside a closed `<details>` opens it: link an FAQ answer with `<a href="#refunds">` and give its `<details>` (or anything in it) that id.
 
 ## Behaviors you switch on with HTML

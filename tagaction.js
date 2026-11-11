@@ -226,10 +226,25 @@
   }
   var nativeGroups = () => "name" in HTMLDetailsElement.prototype;
   var keyFor = (details) => `tagaction:details:${location.pathname}#${details.id}`;
+  var printed = [];
+  function beforePrint() {
+    printed = [...document.querySelectorAll("details:not([open])")].filter((details) => !details.closest('[data-tagaction="off"], header nav li')).map((details) => [details, details.getAttribute("name")]);
+    for (const [details] of printed) details.removeAttribute("name");
+    for (const [details] of printed) details.open = true;
+  }
+  function afterPrint() {
+    for (const [details, name] of printed) {
+      details.open = false;
+      if (name !== null) details.setAttribute("name", name);
+    }
+    printed = [];
+  }
   function init4(root) {
     if (once(document, "details-hash")) {
       addEventListener("hashchange", openTarget);
       openTarget();
+      addEventListener("beforeprint", beforePrint);
+      addEventListener("afterprint", afterPrint);
     }
     each(root, "header nav li > details", "details-dropdown", dropdown);
     each(root, "details", "details", (details) => {

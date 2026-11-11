@@ -528,6 +528,18 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await expect(items).toHaveCount(1);
   });
 
+  test('printing opens every closed details, name groups included, and closes them afterwards', async ({ page }) => {
+    await open(page, 'widgets.html');
+    await page.locator('#q1 > summary').click();
+    const state = () => page.locator('#setup, #q1, #q2').evaluateAll((els) => els.map((el) => el.open));
+    expect(await state()).toEqual([false, true, false]);
+    await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
+    expect(await state()).toEqual([true, true, true]);
+    await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+    expect(await state()).toEqual([false, true, false]);
+    await expect(page.locator('#q2')).toHaveAttribute('name', 'faq');
+  });
+
   test('data-tag-remember keeps details open across visits; name groups open one at a time', async ({ page }) => {
     await open(page, 'widgets.html');
     await page.getByText('Setup').click();
