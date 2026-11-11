@@ -197,7 +197,8 @@ export function init(root) {
       const url = new URL(location.href);
       if (control.value) url.searchParams.set(name, control.value);
       else url.searchParams.delete(name);
-      history.replaceState(history.state, '', url);
+      // Safari throws once a page calls this more than 100 times in 30 seconds.
+      try { history.replaceState(history.state, '', url); } catch { /* the filter still works */ }
     });
     if (control.value) filter(control, target);
   });

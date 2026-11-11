@@ -418,7 +418,10 @@
         const url = new URL(location.href);
         if (control.value) url.searchParams.set(name, control.value);
         else url.searchParams.delete(name);
-        history.replaceState(history.state, "", url);
+        try {
+          history.replaceState(history.state, "", url);
+        } catch {
+        }
       });
       if (control.value) filter(control, target);
     });
