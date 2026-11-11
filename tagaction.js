@@ -1006,10 +1006,40 @@
     });
   }
 
+  // src/behaviors/shortcuts.js
+  var MODIFIERS = { Control: "ctrlKey", Alt: "altKey", Shift: "shiftKey", Meta: "metaKey" };
+  var typing = (target) => target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])');
+  function normalize2(parts) {
+    const key = parts.pop().toLowerCase();
+    const mods = parts.map((part) => part.toLowerCase()).filter((part) => !(part === "shift" && key.length === 1));
+    return [...new Set(mods)].sort().concat(key).join("+");
+  }
+  function fromEvent(event) {
+    const key = event.key === " " ? "Space" : event.key;
+    const mods = Object.keys(MODIFIERS).filter((name) => event[MODIFIERS[name]] && name !== key);
+    return normalize2([...mods, key]);
+  }
+  function init22() {
+    if (!once(document, "shortcuts")) return;
+    document.addEventListener("keydown", (event) => {
+      if (event.defaultPrevented || event.repeat || event.isComposing || !event.key) return;
+      const pressed = fromEvent(event);
+      const modified = /(^|\+)(control|alt|meta)\+/.test(pressed);
+      if (!modified && typing(event.target)) return;
+      const target = find(document, "[aria-keyshortcuts]").find((element) => !element.disabled && !element.closest("[hidden], [inert]") && (element.checkVisibility?.() ?? true) && element.getAttribute("aria-keyshortcuts").split(/\s+/).filter(Boolean).some((shortcut) => normalize2(shortcut.split("+")) === pressed));
+      if (!target) return;
+      event.preventDefault();
+      if (typing(target) && target.matches("input, textarea, select")) {
+        target.focus();
+        if (target.select && target.matches("input")) target.select();
+      } else target.click();
+    });
+  }
+
   // src/index.js
-  var behaviors = [init, init19, init2, init4, init5, init6, init21, init7, init8, init9, init10, init11, init12, init13, init14, init3, init15, init16, init17, init18, init20];
+  var behaviors = [init, init19, init2, init4, init5, init6, init21, init7, init8, init9, init10, init11, init12, init13, init14, init3, init15, init16, init17, init18, init20, init22];
   var VERSION = "0.2.0";
-  function init22(root = document) {
+  function init23(root = document) {
     for (const behavior of behaviors) {
       try {
         behavior(root);
@@ -1021,7 +1051,7 @@
   function start() {
     if (document.documentElement.dataset.tagaction === "off") return;
     addStyles();
-    init22(document);
+    init23(document);
     new MutationObserver((records) => {
       const added = /* @__PURE__ */ new Set();
       for (const record of records) {
@@ -1030,12 +1060,12 @@
       for (const node of added) {
         let covered = false;
         for (let parent = node.parentElement; parent && !covered; parent = parent.parentElement) covered = added.has(parent);
-        if (!covered && node.isConnected) init22(node);
+        if (!covered && node.isConnected) init23(node);
       }
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
   if (typeof window !== "undefined" && !window.TagAction) {
-    window.TagAction = { init: init22, version: VERSION };
+    window.TagAction = { init: init23, version: VERSION };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
     else start();
   }

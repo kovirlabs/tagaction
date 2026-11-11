@@ -75,8 +75,8 @@ test.describe('llms.txt contract', () => {
     }), snippets);
     expect(errors).toEqual([]);
     // Snippets for behaviors that only listen for events (dialogs, popover
-    // menus, details groups and remembered state, sort keys) don't change the HTML.
-    expect(unchanged.filter((html) => !/<dialog|popover|<details|<menu|<template|^<data /.test(html))).toEqual([]);
+    // menus, details groups and remembered state, sort keys, shortcuts) don't change the HTML.
+    expect(unchanged.filter((html) => !/<dialog|popover|<details|<menu|<template|^<data |aria-keyshortcuts/.test(html))).toEqual([]);
   });
 });
 

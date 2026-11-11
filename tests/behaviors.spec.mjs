@@ -736,6 +736,36 @@ test.describe('theme switch', () => {
   });
 });
 
+test.describe('keyboard shortcuts', () => {
+  test('aria-keyshortcuts: "/" focuses the search box, Control+K clicks a button, typing in a field is left alone', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.keyboard.press('/');
+    await expect(page.locator('#quick-search')).toBeFocused();
+    await expect(page.locator('#quick-search')).toHaveValue(''); // the "/" isn't typed
+    // While typing in a field, a key without a modifier types as usual.
+    await page.locator('#note-field').click();
+    await page.keyboard.type('a/b');
+    await expect(page.locator('#note-field')).toHaveValue('a/b');
+    // With a modifier it works from inside a field too.
+    await page.keyboard.press('Control+k');
+    await expect(page.locator('#palette')).toHaveAttribute('data-clicked', '1');
+    await page.keyboard.press('Meta+K');
+    await expect(page.locator('#palette')).toHaveAttribute('data-clicked', '2');
+    // Disabled elements are skipped.
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.keyboard.press('g');
+    await expect(page.locator('#off-shortcut')).not.toBeFocused();
+  });
+
+  test('a shortcut on content added later works', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend', '<input id="late-field" aria-label="Late" aria-keyshortcuts="Alt+L">'));
+    await page.keyboard.press('Alt+l');
+    await expect(page.locator('#late-field')).toBeFocused();
+  });
+});
+
 test.describe('tabs', () => {
   test('only the selected panel shows, and arrow keys, Home and End move between tabs', async ({ page }) => {
     await open(page, 'extras.html');
