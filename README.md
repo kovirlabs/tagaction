@@ -19,24 +19,26 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | HTML | Behavior | Hook |
 | --- | --- | --- |
 | `<dialog>` | A modal closes on a backdrop click. Opens from a button with no script. | native `commandfor` / `command`; `closedby` opts out |
-| `<details>` | One open at a time; remembers open state; opens when a link points inside it; in the header nav, a dropdown that closes on Escape, a click outside, or a chosen link | native `name`; `data-tag-remember`; `#fragment` links; `<li><details>` in a header `<nav>` |
-| `<table>`, lists | Click a header to sort; filter from a search box; a list written `hidden` is search results | `<thead>`; `aria-sort`; `<input aria-controls>` |
+| `<details>` | One open at a time; remembers open state; opens when a link points inside it; all open for printing; in the header nav, a dropdown that closes on Escape, a click outside, or a chosen link | native `name`; `data-tag-remember` (also keeps a table's sort order); `#fragment` links; `<li><details>` in a header `<nav>` |
+| `<table>`, lists | Click a header to sort; columns of numbers line up on the right; filter from a search box (matches highlighted, with "No matches" and a count for screen readers; a `name` keeps it in the address); a list written `hidden` is search results | `<thead>`; `aria-sort`; `<input aria-controls>` |
 | `<form>` | Messages under the fields; busy submit button; unsaved-changes warning; a confirm field must match | native validation; `method="post"`; `data-tag-match` |
-| `<textarea>` | Grows as you type; character counter | no `rows`; `maxlength` |
-| `<input type="file">` | Lists chosen files; drag and drop | `multiple`; its `<label>` |
+| `<textarea>` | Grows as you type; character counter; Ctrl+Enter or ⌘+Enter sends its form (with validation, never mid-IME) | no `rows`; `maxlength` |
+| `<input type="file">` | Lists chosen files, with thumbnails of pictures; drag and drop | `multiple`; `accept="image/*"`; its `<label>` |
 | `<input type="password">` | Show/Hide button | automatic |
 | `<pre>` | Copy button | automatic |
 | `<time>` | Reader's timezone; "3 hours ago" | `datetime` with a zone; `data-tag-time="relative"` |
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
-| `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
+| `<img>` | Click to enlarge; step through the pictures of a figure or section | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |
-| Tabs | Shows the selected panel; arrow keys, Home, End | `role="tablist"`, `role="tab"` with `aria-controls` |
-| Theme | Light/dark switch, remembered | `<select data-tag-theme>` or `<button data-tag-theme>` |
+| Tabs | Shows the selected panel; arrow keys, Home, End; find-in-page and `#panel` links select a tab | `role="tablist"`, `role="tab"` with `aria-controls` |
+| Selectable rows | A header checkbox selects all shown rows, goes mixed, Shift-click selects a range | `<th><input type="checkbox">` |
+| Shortcuts | A key focuses a field or clicks a button (not while typing, unless it has a modifier) | `aria-keyshortcuts="/"`, `"Control+K Meta+K"` |
+| Theme | Light/dark switch, remembered (load the script without `defer` so the saved scheme applies before the first paint) | `<select data-tag-theme>` or `<button data-tag-theme>` |
 | Copy, share | Copy any field or element; share a link or section | `<button commandfor command="--copy">`, `command="--share"` |
 | `<output>` | Live value, total, or product; currency and percent formatting | native `for`; `data-tag-calc="product"`, `data-tag-format="USD"` |
 | `<abbr>` | Title shown on tap | `title` |
-| `<template>` | Add repeated rows | `<button commandfor command="--clone">` |
+| `<template>` | Add repeated rows, and remove any of them | `<button commandfor command="--clone">`, `command="--remove"` |
 
 [`llms.txt`](llms.txt) has the exact HTML for each one. It is the short, complete guide, written for people and for AI agents.
 

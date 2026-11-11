@@ -77,6 +77,59 @@ test.describe('table', () => {
     expect(await column(page, 'numbers', 2)).toEqual(['15', '900', '1,200']);
   });
 
+  test('number columns line up on the right, header included; an author\'s align or text-align wins', async ({ page }) => {
+    await open(page, 'table.html');
+    const align = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).textAlign);
+    const nums = (table) => page.locator(`#${table} thead th`).evaluateAll((els) => els.map((el) => el.dataset.tag === 'num'));
+    expect(await nums('orders')).toEqual([false, true, false, false]); // <data value>; dates and names are not numbers
+    expect(await nums('aligned')).toEqual([false, false, true, true, false, true, true]); // "−$5.00", "-$12.50", "($3.00)" are amounts // "#1042" is an id // an empty cell doesn't count against a column
+    expect(await align('#aligned thead th:nth-child(3)')).toBe('end');
+    expect(await align('#aligned tbody td:nth-child(3)')).toBe('end');
+    expect(await page.locator('#aligned tbody td:nth-child(3)').first().evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toBe('tabular-nums');
+    expect(await align('#aligned tbody td:nth-child(1)')).toBe('start'); // false match: names stay on the left
+    expect(await align('#aligned tbody td:nth-child(2)')).toBe('start'); // and ids
+    expect(await align('#aligned tbody td:nth-child(5)')).toBe('start'); // "Q1" is a label, not a number
+    expect(await align('#aligned tbody td:nth-child(4)')).toMatch(/center/); // align="center" wins
+    expect(await align('#aligned tbody td:nth-child(6)')).toMatch(/center/); // style wins
+    // Sorting keeps the marks on the moved cells.
+    await page.locator('#aligned').getByRole('button', { name: 'Clients' }).click();
+    await expect(page.locator('#aligned tbody td:nth-child(3)[data-tag="num"]')).toHaveCount(2);
+  });
+
+  test('rows added later line up in number columns, and a late non-number does not un-mark a column', async ({ page }) => {
+    await open(page, 'table.html');
+    await expect(page.locator('#numbers th[data-tag="num"]')).toHaveText('Count');
+    await page.evaluate(() => document.querySelector('#numbers tbody').insertAdjacentHTML('beforeend', '<tr><td>d</td><td>7</td></tr><tr><td>e</td><td>—</td></tr>'));
+    await expect(page.locator('#numbers tbody td:nth-child(2)[data-tag="num"]')).toHaveCount(5);
+    await expect(page.locator('#numbers th[data-tag="num"]')).toHaveText('Count');
+    await expect(page.locator('#numbers tbody td:nth-child(1)[data-tag="num"]')).toHaveCount(0);
+    // A table that starts with no rows (rows come from --clone or htmx) is checked when they arrive.
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<table id="empty"><thead><tr><th>Item</th><th>Price</th></tr></thead><tbody></tbody></table>'));
+    await page.evaluate(() => document.querySelector('#empty tbody').insertAdjacentHTML('beforeend', '<tr><td>Tea</td><td>$4</td></tr>'));
+    await expect(page.locator('#empty th[data-tag="num"]')).toHaveText('Price');
+  });
+
+  test('a table added later gets its number columns marked', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<table id="late"><thead><tr><th>Name</th><th>Total</th></tr></thead><tbody><tr><td>A</td><td>$5</td></tr><tr><td>B</td><td>$12</td></tr></tbody></table>'));
+    await expect(page.locator('#late th[data-tag="num"]')).toHaveText('Total');
+    await expect(page.locator('#late td[data-tag="num"]')).toHaveCount(2);
+  });
+
+  test('under data-tag-remember a table keeps its sort order across visits; other tables do not', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.locator('#kept').getByRole('button', { name: 'Seats' }).click();
+    await page.locator('#kept').getByRole('button', { name: 'Seats' }).click();
+    expect(await column(page, 'kept', 2)).toEqual(['10', '5', '1']);
+    await page.locator('#numbers').getByRole('button', { name: 'Count' }).click();
+    await page.reload();
+    expect(await column(page, 'kept', 2)).toEqual(['10', '5', '1']);
+    await expect(page.locator('#kept th').nth(1)).toHaveAttribute('aria-sort', 'descending');
+    expect(await column(page, 'numbers', 2)).toEqual(['1,200', '900', '15']); // not remembered: source order
+  });
+
   test('keyboard: header buttons sort with Enter and Space', async ({ page }) => {
     await open(page, 'table.html');
     await page.locator('#numbers').getByRole('button', { name: 'Item' }).focus();
@@ -90,6 +143,86 @@ test.describe('table', () => {
     await open(page, 'table.html');
     await expect(page.locator('#orders th[data-tagaction="off"] button')).toHaveCount(0);
     await expect(page.locator('#one-row button')).toHaveCount(0);
+  });
+
+  test('a filter that matches nothing says so, and otherwise tells screen readers the count', async ({ page }) => {
+    await open(page, 'table.html');
+    const status = page.locator('#orders + [role="status"]');
+    await expect(status).toHaveText('');
+    const filter = page.getByLabel('Filter orders');
+    await filter.pressSequentially('zzz');
+    await expect(status).toHaveText('No matches for “zzz”');
+    await expect(status).toBeVisible();
+    expect((await status.boundingBox()).width).toBeGreaterThan(50);
+    await filter.fill('maya');
+    // The count waits for a pause in typing (about 400 ms), so it isn't announced per keystroke.
+    expect(await status.textContent()).not.toBe('1 of 4 shown');
+    await expect(status).toHaveText('1 of 4 shown');
+    expect((await status.boundingBox()).width).toBeLessThanOrEqual(1); // for screen readers only
+    await filter.fill('');
+    await expect(status).toHaveText('');
+    // A list filtered by a box added later gets its own line.
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<input type="search" aria-label="Filter colors" aria-controls="colors"><ul id="colors"><li>Red</li><li>Blue</li></ul>'));
+    await page.getByLabel('Filter colors').fill('green');
+    await expect(page.locator('#colors + [role="status"]')).toHaveText('No matches for “green”');
+  });
+
+  test('matching words are highlighted without changing the HTML', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.getByLabel('Filter orders').fill('ma lin');
+    const ranges = () => page.evaluate(() => [...(CSS.highlights.get('tagaction-match') ?? [])].map((r) => r.toString()));
+    await expect.poll(ranges).toEqual(expect.arrayContaining(['Ma', 'Lin']));
+    await expect(page.locator('#orders mark, #orders span')).toHaveCount(0); // nothing wrapped
+    expect((await ranges()).every((text) => /^(ma|lin)$/i.test(text))).toBe(true);
+    await page.getByLabel('Filter orders').fill('');
+    await expect.poll(ranges).toEqual([]);
+  });
+
+  test('select all: the header box checks shown rows, goes mixed, and Shift-click checks a range', async ({ page }) => {
+    await open(page, 'table.html');
+    const all = page.getByLabel('Select all users');
+    const rows = page.locator('#users tbody td:first-child input');
+    const state = () => all.evaluate((el) => (el.indeterminate ? 'mixed' : String(el.checked)));
+    // Mouse: one row makes the header mixed; the header checks the rest.
+    await page.getByLabel('Select Bo').check();
+    expect(await state()).toBe('mixed');
+    await all.click();
+    expect(await rows.evaluateAll((els) => els.every((el) => el.checked))).toBe(true);
+    expect(await state()).toBe('true');
+    await expect(page.getByLabel('Bo active')).not.toBeChecked(); // switches in other columns are untouched
+    // Keyboard: Space on the header clears every row.
+    await all.focus();
+    await page.keyboard.press('Space');
+    expect(await rows.evaluateAll((els) => els.some((el) => el.checked))).toBe(false);
+    expect(await state()).toBe('false');
+    // Shift-click checks the range between the last box clicked and this one.
+    await page.getByLabel('Select Maya').click();
+    await page.getByLabel('Select Ana').click({ modifiers: ['Shift'] });
+    expect(await rows.evaluateAll((els) => els.map((el) => el.checked))).toEqual([true, true, true, false]);
+    // A row added later counts.
+    await page.evaluate(() => document.querySelector('#users tbody').insertAdjacentHTML('beforeend', '<tr><td><input type="checkbox" aria-label="Select Lee"></td><td>Lee</td><td></td></tr>'));
+    await page.getByLabel('Select Lee').check();
+    expect(await state()).toBe('mixed');
+    // The header cell holding a checkbox gets no sort button.
+    await expect(page.locator('#users thead th:first-child [data-tag="sort"]')).toHaveCount(0);
+  });
+
+  test('a filter box with a name starts from the address and keeps it up to date', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.goto(page.url() + '?orders=maya#top');
+    await expect(page.getByLabel('Filter orders')).toHaveValue('maya');
+    await expect(page.locator('#orders tbody tr:visible')).toHaveCount(1);
+    await page.getByLabel('Filter orders').fill('bo');
+    expect(new URL(page.url()).searchParams.get('orders')).toBe('bo');
+    expect(new URL(page.url()).hash).toBe('#top');
+    await page.reload();
+    await expect(page.locator('#orders tbody tr:visible')).toHaveCount(1);
+    await page.getByLabel('Filter orders').fill('');
+    expect(new URL(page.url()).searchParams.has('orders')).toBe(false);
+    // A filter box without a name leaves the address alone (false match).
+    await page.getByLabel('Filter fruit').fill('apple');
+    expect(new URL(page.url()).search).toBe('');
   });
 
   test('a search input with aria-controls filters rows and list items', async ({ page }) => {
@@ -131,11 +264,41 @@ test.describe('form', () => {
     await expect(page.locator('fieldset > small[data-tag="error"]')).toBeEmpty();
   });
 
+  test('the first invalid field is focused clear of a sticky top bar', async ({ page }) => {
+    await open(page, 'form.html', { width: 900, height: 500 });
+    // TagBrush.css's sticky bar (data-layout="sticky"), standing in for the published 1.x build.
+    await page.addStyleTag({ content: 'body > header { position: sticky; top: 0; height: 64px; background: Canvas; z-index: 1 } :root { scroll-padding-top: 5rem }' });
+    await page.evaluate(() => document.body.prepend(Object.assign(document.createElement('header'), { innerHTML: '<nav><strong>Site</strong></nav>' })));
+    await page.getByLabel('Email').fill('maya@example.com');
+    await page.getByLabel('Name').fill('Maya');
+    // The password is the first invalid field; start with it right under the bar.
+    await page.evaluate(() => scrollTo(0, document.querySelector('#password').getBoundingClientRect().top + scrollY - 20));
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page.locator('#password')).toBeFocused();
+    const [bar, field] = [await page.locator('body > header').boundingBox(), await page.locator('#password').boundingBox()];
+    expect(field.y).toBeGreaterThanOrEqual(bar.y + bar.height);
+    expect(field.y + field.height).toBeLessThanOrEqual(500);
+  });
+
   test('the password message goes under the password row, not inside it', async ({ page }) => {
     await open(page, 'form.html');
     await page.getByRole('button', { name: 'Create account' }).click();
     await expect(page.locator('[data-tag="password"] small')).toHaveCount(0);
     await expect(page.locator('[data-tag="password"] + small')).not.toHaveText('At least 8 characters.');
+  });
+
+  test('help text after a password field stays under the Show/Hide row, as on the sign-up page', async ({ page }) => {
+    await open(page, 'form.html');
+    const row = await page.locator('[data-tag="password"]').boundingBox();
+    const help = page.locator('[data-tag="password"] + small');
+    await expect(help).toHaveText('At least 8 characters.');
+    const box = await help.boundingBox();
+    expect(await help.evaluate((el) => getComputedStyle(el).display)).toBe('block');
+    expect(box.y).toBeGreaterThanOrEqual(row.y + row.height);
+    expect(Math.round(box.x)).toBe(Math.round(row.x));
+    // The next label starts on its own line below the help text.
+    const next = await page.locator('label:has([name="terms"])').boundingBox();
+    expect(next.y).toBeGreaterThanOrEqual(box.y + box.height);
   });
 
   test('the submit button is disabled and busy while the form is sent', async ({ page }) => {
@@ -194,6 +357,34 @@ test.describe('textarea, file, password', () => {
     await expect(page.locator('#note + small + small[data-tag="count"]')).toHaveText('0 / 100');
   });
 
+  test('Ctrl+Enter or ⌘+Enter in a textarea sends its form, with validation', async ({ page }) => {
+    await open(page, 'form.html');
+    await page.getByLabel('Bio').fill('Hello');
+    await page.getByLabel('Bio').press('Control+Enter');
+    // requestSubmit runs validation: the empty required email is reported and focused.
+    await expect(page.getByLabel('Email')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel('Email')).toBeFocused();
+    await expect(page.getByLabel('Bio')).toHaveValue('Hello'); // no newline added
+
+    // A form added later sends with ⌘+Enter; plain Enter still types a newline.
+    await page.route('https://example.test/**', (route) => route.fulfill({ body: '<p>Sent</p>', contentType: 'text/html' }));
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend',
+      '<form id="reply" action="https://example.test/reply"><label for="reply-text">Reply</label><textarea id="reply-text" name="text"></textarea><button>Send</button></form>'));
+    const reply = page.getByLabel('Reply');
+    await reply.fill('Thanks');
+    await reply.press('Enter');
+    await expect(reply).toHaveValue('Thanks\n');
+    // Not while an input method is composing.
+    const composing = await reply.evaluate((el) => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, isComposing: true, cancelable: true, bubbles: true });
+      el.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    expect(composing).toBe(false);
+    await reply.press('Meta+Enter');
+    await expect(page.getByText('Sent')).toBeVisible();
+  });
+
   test('a textarea without rows grows as you type', async ({ page }) => {
     await open(page, 'widgets.html');
     const notes = page.getByLabel('Notes');
@@ -221,6 +412,28 @@ test.describe('textarea, file, password', () => {
     await label.dispatchEvent('drop', { dataTransfer });
     await expect(label).not.toHaveAttribute('data-tag-drop');
     await expect(page.locator('#docs + small[data-tag="files"]')).toHaveText('dropped.pdf');
+  });
+
+  test('an image file input shows a thumbnail of the chosen picture, and frees it when the choice changes', async ({ page }) => {
+    await open(page, 'form.html');
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await page.evaluate(() => { window.revoked = []; const revoke = URL.revokeObjectURL; URL.revokeObjectURL = (url) => { window.revoked.push(url); revoke(url); }; });
+    await page.getByLabel('Avatar').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: png });
+    const list = page.locator('#avatar + small[data-tag="files"]');
+    await expect(list).toHaveText('me.png');
+    const thumb = list.locator('img[data-tag="thumb"]');
+    await expect(thumb).toHaveAttribute('alt', '');
+    const first = await thumb.getAttribute('src');
+    expect(first).toMatch(/^blob:/);
+    expect(await thumb.evaluate((img) => img.complete && img.naturalWidth)).toBe(1);
+    await page.getByLabel('Avatar').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+    await expect(list).toHaveText('notes.txt');
+    await expect(list.locator('img')).toHaveCount(0);
+    expect(await page.evaluate(() => window.revoked)).toContain(first);
+    // False match: a single file input that doesn't accept images gets no list.
+    await page.evaluate(() => document.querySelector('form').insertAdjacentHTML('beforeend', '<input type="file" id="cv" aria-label="CV" accept=".pdf">'));
+    await page.locator('#cv').setInputFiles({ name: 'cv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') });
+    await expect(page.locator('#cv + small')).toHaveCount(0);
   });
 
   test('a password field gets a labeled Show/Hide toggle', async ({ page }) => {
@@ -315,6 +528,46 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  test('a --remove button takes its row out, and focus moves to the previous row or the Add button', async ({ page }) => {
+    await open(page, 'widgets.html');
+    const items = page.locator('#items > li');
+    const removes = page.locator('#items').getByRole('button', { name: 'Remove' });
+    await expect(removes).toHaveCount(1);
+    await expect(removes.first()).toBeVisible(); // written hidden; shown by TagAction
+    await page.click('#add-item');
+    await page.click('#add-item');
+    await expect(items).toHaveCount(3);
+    await expect(removes).toHaveCount(3);
+    await expect(removes.nth(2)).toBeVisible(); // copies added later are shown too
+    await expect(page.locator('#item-3 [commandfor="item-3"]')).toHaveCount(1);
+    // Mouse: remove the middle row; focus goes to the row before it.
+    await page.locator('#item-2').getByRole('button', { name: 'Remove' }).click();
+    await expect(items).toHaveCount(2);
+    await expect(page.locator('#item-2')).toHaveCount(0);
+    await expect(page.locator('#item-name')).toBeFocused();
+    // Keyboard: remove the first row; with no row before it, focus goes to Add.
+    await page.locator('#item').getByRole('button', { name: 'Remove' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(items).toHaveCount(1);
+    await expect(page.locator('#add-item')).toBeFocused();
+    // An opted-out target stays.
+    await page.locator('#item-3').evaluate((el) => { el.dataset.tagaction = 'off'; });
+    await page.locator('#item-3').getByRole('button', { name: 'Remove' }).click();
+    await expect(items).toHaveCount(1);
+  });
+
+  test('printing opens every closed details, name groups included, and closes them afterwards', async ({ page }) => {
+    await open(page, 'widgets.html');
+    await page.locator('#q1 > summary').click();
+    const state = () => page.locator('#setup, #q1, #q2').evaluateAll((els) => els.map((el) => el.open));
+    expect(await state()).toEqual([false, true, false]);
+    await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
+    expect(await state()).toEqual([true, true, true]);
+    await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+    expect(await state()).toEqual([false, true, false]);
+    await expect(page.locator('#q2')).toHaveAttribute('name', 'faq');
+  });
+
   test('data-tag-remember keeps details open across visits; name groups open one at a time', async ({ page }) => {
     await open(page, 'widgets.html');
     await page.getByText('Setup').click();
@@ -327,6 +580,29 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await page.getByText('Two', { exact: true }).click();
     await expect(page.locator('#q1')).not.toHaveAttribute('open');
     await expect(page.locator('#q2')).toHaveAttribute('open', '');
+  });
+
+  test('pictures in one section form a set: Previous/Next and the arrow keys step through it', async ({ page }) => {
+    await open(page, 'widgets.html');
+    const viewer = page.locator('dialog[data-tag="viewer"]');
+    await page.getByRole('link', { name: 'Second square' }).click();
+    await expect(viewer.locator('output')).toHaveText('2 of 3');
+    await expect(viewer.locator('img')).toHaveAttribute('alt', 'Second square');
+    await expect(viewer.locator('figcaption')).toHaveText('Second');
+    // Mouse: the buttons step and don't close the viewer.
+    await viewer.getByRole('button', { name: 'Next picture' }).click();
+    await expect(viewer.locator('img')).toHaveAttribute('alt', 'Third square');
+    await expect(viewer).toHaveAttribute('aria-label', 'Third square');
+    // Keyboard: arrows wrap around the set.
+    await page.keyboard.press('ArrowRight');
+    await expect(viewer.locator('output')).toHaveText('1 of 3');
+    await page.keyboard.press('ArrowLeft');
+    await expect(viewer.locator('figcaption')).toHaveText('Third');
+    await page.keyboard.press('Escape');
+    await expect(viewer).toHaveCount(0);
+    // A picture on its own (not in a set) gets no stepping buttons.
+    await page.getByRole('link', { name: 'A big orange square' }).click();
+    await expect(viewer.getByRole('button', { name: 'Next picture' })).toHaveCount(0);
   });
 
   test('a link to an image opens it in a viewer; so does a shrunk figure image', async ({ page }) => {
@@ -408,6 +684,24 @@ test.describe('menus', () => {
     await page.getByRole('heading', { name: 'Menus' }).click(); // outside
     await expect(list).toBeHidden();
     await expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('a dropdown list stays on screen: under its button, flipping up near the bottom edge', async ({ page, browserName }) => {
+    await open(page, 'menu.html', { width: 700, height: 330 });
+    test.skip(!(await page.evaluate(() => CSS.supports('position-area: block-end'))), `${browserName}: no anchor positioning; the list keeps its place under the button`);
+    const box = (sel) => page.locator(sel).boundingBox();
+    await page.getByRole('button', { name: 'Account' }).click();
+    let [button, list] = [await box('[aria-controls="account"]'), await box('#account')];
+    expect(list.y).toBeGreaterThanOrEqual(button.y + button.height - 1);
+    expect(list.x + list.width).toBeLessThanOrEqual(700);
+    expect(list.x).toBeGreaterThan(300); // under the button at the end of the bar, not at the start
+    expect(list.x).toBeGreaterThanOrEqual(0);
+    await page.keyboard.press('Escape');
+    // A dropdown at the bottom of the window opens upward.
+    await page.locator('[aria-controls="lang"]').evaluate((el) => el.scrollIntoView({ block: 'end' }));
+    await page.getByRole('button', { name: 'Language' }).click();
+    [button, list] = [await box('[aria-controls="lang"]'), await box('#lang')];
+    expect(list.y + list.height).toBeLessThanOrEqual(button.y + 1);
   });
 
   test('keyboard: ArrowDown opens and moves, Escape closes and returns focus', async ({ page }) => {
@@ -567,6 +861,72 @@ test.describe('theme switch', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await page.selectOption('#theme-select', '');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
+  });
+
+  test('the saved theme is on <html> before the body is parsed, with the script in <head> without defer', async ({ page }) => {
+    await page.route(/tagaction@[^/]+\/tagaction(\.min)?\.js/, (route) => route.fulfill({ path: 'tagaction.js', contentType: 'text/javascript' }));
+    await page.route('https://example.test/theme.html', (route) => route.fulfill({ contentType: 'text/html', body: `<!doctype html><html lang="en"><head>
+      <script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js"></script></head>
+      <body><script>window.atFirstParse = document.documentElement.dataset.theme ?? null;</script>
+      <select data-tag-theme aria-label="Color scheme" hidden><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></body></html>` }));
+    await page.goto('https://example.test/theme.html');
+    expect(await page.evaluate(() => window.atFirstParse)).toBe(null);
+    await page.selectOption('select', 'dark');
+    await page.reload();
+    expect(await page.evaluate(() => window.atFirstParse)).toBe('dark');
+    await expect(page.locator('select')).toHaveValue('dark');
+  });
+});
+
+test.describe('tabs and links', () => {
+  test('a link to a panel, or to something in it, selects its tab, on load and on hashchange', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.goto(page.url() + '#download-note');
+    await expect(page.locator('#tab-download')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#download')).toBeVisible();
+    await page.evaluate(() => { location.hash = 'npm'; });
+    await expect(page.locator('#tab-npm')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#cdn')).toBeHidden();
+  });
+
+  test('hidden panels are found by find-in-page: hidden="until-found", and beforematch selects the tab', async ({ page, browserName }) => {
+    await open(page, 'extras.html');
+    const supported = await page.evaluate(() => 'onbeforematch' in document.documentElement);
+    await expect(page.locator('#npm')).toHaveAttribute('hidden', supported ? 'until-found' : '');
+    test.skip(!supported, `${browserName}: no hidden="until-found"; panels use plain hidden`);
+    await page.locator('#npm').evaluate((panel) => panel.dispatchEvent(new Event('beforematch')));
+    await expect(page.locator('#tab-npm')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#npm')).not.toHaveAttribute('hidden', /.*/);
+  });
+});
+
+test.describe('keyboard shortcuts', () => {
+  test('aria-keyshortcuts: "/" focuses the search box, Control+K clicks a button, typing in a field is left alone', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.keyboard.press('/');
+    await expect(page.locator('#quick-search')).toBeFocused();
+    await expect(page.locator('#quick-search')).toHaveValue(''); // the "/" isn't typed
+    // While typing in a field, a key without a modifier types as usual.
+    await page.locator('#note-field').click();
+    await page.keyboard.type('a/b');
+    await expect(page.locator('#note-field')).toHaveValue('a/b');
+    // With a modifier it works from inside a field too.
+    await page.keyboard.press('Control+k');
+    await expect(page.locator('#palette')).toHaveAttribute('data-clicked', '1');
+    await page.keyboard.press('Meta+K');
+    await expect(page.locator('#palette')).toHaveAttribute('data-clicked', '2');
+    // Disabled elements are skipped.
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.keyboard.press('g');
+    await expect(page.locator('#off-shortcut')).not.toBeFocused();
+  });
+
+  test('a shortcut on content added later works', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.evaluate(() => document.querySelector('main').insertAdjacentHTML('beforeend', '<input id="late-field" aria-label="Late" aria-keyshortcuts="Alt+L">'));
+    await page.keyboard.press('Alt+l');
+    await expect(page.locator('#late-field')).toBeFocused();
   });
 });
 

@@ -10,7 +10,7 @@
 <body>
 <main>
   <h1>Orders</h1>
-  <search><input type="search" aria-label="Filter orders" aria-controls="orders"></search>
+  <search><input type="search" name="orders" aria-label="Filter orders" aria-controls="orders"></search>
   <table id="orders">
     <thead><tr><th>Customer</th><th>Total</th><th>Date</th><th data-tagaction="off">Actions</th></tr></thead>
     <tbody>
@@ -20,9 +20,32 @@
       <tr><td>Bo Ito</td><td><data value="18">$18</data></td><td><time datetime="2026-07-04">Jul 4</time></td><td><button>Edit</button></td></tr>
     </tbody>
   </table>
+  <section data-tag-remember>
+    <table id="kept">
+      <thead><tr><th>Plan</th><th>Seats</th></tr></thead>
+      <tbody><tr><td>Team</td><td>10</td></tr><tr><td>Solo</td><td>1</td></tr><tr><td>Studio</td><td>5</td></tr></tbody>
+    </table>
+  </section>
   <table id="numbers">
     <thead><tr><th>Item</th><th>Count</th></tr></thead>
     <tbody><tr><td>b</td><td>1,200</td></tr><tr><td>a</td><td>900</td></tr><tr><td>c</td><td>15</td></tr></tbody>
+  </table>
+  <table id="aligned">
+    <thead><tr><th>Team</th><th>Ticket</th><th>Clients</th><th align="center">Seats</th><th>Plan</th><th>Score</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td>North</td><td>#1042</td><td>42</td><td align="center">5</td><td>Q1</td><td style="text-align: center">7</td><td>−$5.00</td></tr>
+      <tr><td>South</td><td>#1041</td><td>118</td><td align="center">12</td><td>Q2</td><td style="text-align: center">9</td><td>-$12.50</td></tr>
+      <tr><td>East</td><td>#1040</td><td></td><td align="center">3</td><td>Q3</td><td style="text-align: center">4</td><td>($3.00)</td></tr>
+    </tbody>
+  </table>
+  <table id="users">
+    <thead><tr><th><input type="checkbox" aria-label="Select all users"></th><th>Name</th><th>Active</th></tr></thead>
+    <tbody>
+      <tr><td><input type="checkbox" name="user" value="1" aria-label="Select Maya"></td><td>Maya</td><td><input type="checkbox" role="switch" aria-label="Maya active" checked></td></tr>
+      <tr><td><input type="checkbox" name="user" value="2" aria-label="Select Bo"></td><td>Bo</td><td><input type="checkbox" role="switch" aria-label="Bo active"></td></tr>
+      <tr><td><input type="checkbox" name="user" value="3" aria-label="Select Ana"></td><td>Ana</td><td><input type="checkbox" role="switch" aria-label="Ana active"></td></tr>
+      <tr><td><input type="checkbox" name="user" value="4" aria-label="Select Zoë"></td><td>Zoë</td><td><input type="checkbox" role="switch" aria-label="Zoë active"></td></tr>
+    </tbody>
   </table>
   <input type="search" aria-label="Filter fruit" aria-controls="fruit" hidden>
   <ul id="fruit"><li>Apple pie</li><li>Banana bread</li><li>Cherry tart</li></ul>

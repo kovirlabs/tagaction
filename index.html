@@ -8,7 +8,7 @@
 <link rel="icon" href="https://kovirlabs.github.io/tagstack/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tagbrush@1/tagbrush.min.css">
 <link rel="stylesheet" href="https://kovirlabs.github.io/tagstack/brand.css">
-<script src="tagaction.min.js" defer></script>
+<script src="tagaction.min.js"></script>
 </head>
 <body>
 <header>
@@ -50,7 +50,7 @@
 
     <h2>Tables</h2>
     <p>Click a column header to sort. Type to filter.</p>
-    <search><input type="search" aria-label="Filter orders" aria-controls="orders" placeholder="Filter orders…" hidden></search>
+    <search><input type="search" aria-label="Filter orders" aria-controls="orders" aria-keyshortcuts="/" placeholder="Filter orders… (press /)" hidden></search>
     <table id="orders">
       <thead><tr><th>Customer</th><th>Total</th><th>Placed</th><th>Status</th></tr></thead>
       <tbody>
@@ -62,7 +62,7 @@
     </table>
 
     <h2>Forms</h2>
-    <p>Submit with mistakes to see messages under the fields. Choose several files, or drop them on the label.</p>
+    <p>Submit with mistakes to see messages under the fields. Ctrl+Enter (⌘+Enter) in the bio sends the form too. Choose several files, or drop them on the label.</p>
     <form action="https://example.com/signup" method="post">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" required>
@@ -83,8 +83,8 @@
       <p>Room for the stay: <output for="nights room" data-tag-calc="product" data-tag-format="USD">$240.00</output></p>
       <h3>Guests</h3>
       <ul>
-        <li><label for="guest">Guest name</label><input id="guest" name="guest"></li>
-        <template id="new-guest"><li><label for="guest">Guest name</label><input id="guest" name="guest"></li></template>
+        <li id="guest-row"><label for="guest">Guest name</label><input id="guest" name="guest"> <button type="button" class="secondary" commandfor="guest-row" command="--remove" hidden>Remove</button></li>
+        <template id="new-guest"><li id="guest-row"><label for="guest">Guest name</label><input id="guest" name="guest"> <button type="button" class="secondary" commandfor="guest-row" command="--remove" hidden>Remove</button></li></template>
       </ul>
       <div role="group">
         <button type="button" class="secondary" commandfor="new-guest" command="--clone" hidden>Add guest</button>

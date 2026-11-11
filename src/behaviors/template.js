@@ -6,6 +6,11 @@
 // with JavaScript, so it can carry `hidden`; TagAction shows it.
 // Ids inside each copy get a number (-2, -3, …) and the for, aria-*, list,
 // and commandfor attributes that point at them are updated to match.
+// A button with command="--remove" removes the element it names, so every
+// row can be taken out again: give the template's row an id and put
+//   <button type="button" commandfor="row-id" command="--remove" hidden>Remove</button>
+// in it (and in the first, static row). Focus moves to the previous row, or
+// else to the Add button, or the next row.
 
 import { each, find, focusables, once, reveal } from '../core.js';
 
@@ -32,14 +37,30 @@ function clone(template) {
   (added.map((element) => focusables(element)[0] ?? null).find(Boolean))?.focus();
 }
 
+const rows = (element) => [...element.parentElement.children].filter((child) => !child.matches('template'));
+
+function remove(row) {
+  const siblings = rows(row);
+  const index = siblings.indexOf(row);
+  const template = row.parentElement.querySelector(':scope > template[id]');
+  const add = template && find(document, `button[command="--clone"][commandfor="${CSS.escape(template.id)}"]`)[0];
+  const next = [siblings[index - 1], add, siblings[index + 1]].map((place) => place && (place.matches('button') ? place : focusables(place)[0])).find(Boolean);
+  row.remove();
+  next?.focus();
+}
+
 export function init(root) {
   each(root, 'button[commandfor][command="--clone"]', 'clone-button', (button) => {
     if (document.getElementById(button.getAttribute('commandfor'))?.matches('template')) reveal(button);
   });
+  each(root, 'button[commandfor][command="--remove"]', 'remove-button', (button) => {
+    if (document.getElementById(button.getAttribute('commandfor'))) reveal(button);
+  });
   if (!once(document, 'template')) return;
   document.addEventListener('command', (event) => {
-    const template = event.target;
-    if (event.command !== '--clone' || !template.matches?.('template') || !find(template, 'template').length) return;
-    clone(template);
+    const target = event.target;
+    if (event.command === '--remove' && target.parentElement && find(target, '*').includes(target)) remove(target);
+    if (event.command !== '--clone' || !target.matches?.('template') || !find(target, 'template').length) return;
+    clone(target);
   }, true);
 }

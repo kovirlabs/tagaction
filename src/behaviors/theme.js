@@ -6,7 +6,9 @@
 // - <button data-tag-theme>Dark mode</button> switches between light and dark,
 //   starting from whatever the page shows now, with aria-pressed when dark.
 // The control only works with JavaScript, so it can carry `hidden`; TagAction
-// shows it. The saved choice is applied as soon as TagAction loads.
+// shows it. The saved choice is applied the moment the script runs, before
+// the page waits for DOMContentLoaded: loaded without `defer` in <head>, that
+// is before the first paint, so a dark page doesn't flash light first.
 
 import { each, find, once, reveal, store } from '../core.js';
 
@@ -34,11 +36,17 @@ function choose(theme) {
   apply(theme);
 }
 
+function applySaved() {
+  if (!once(document, 'theme')) return;
+  const saved = store.get(KEY);
+  if (saved !== null) apply(saved);
+}
+
+// At load, not at DOMContentLoaded. Respects data-tagaction="off" on <html>.
+if (typeof document !== 'undefined' && document.documentElement.dataset.tagaction !== 'off') applySaved();
+
 export function init(root) {
-  if (once(document, 'theme')) {
-    const saved = store.get(KEY);
-    if (saved !== null) apply(saved);
-  }
+  applySaved();
   each(root, 'select[data-tag-theme], button[data-tag-theme]', 'theme', (control) => {
     reveal(control);
     sync(control);

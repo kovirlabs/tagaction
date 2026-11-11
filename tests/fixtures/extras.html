@@ -42,7 +42,7 @@
             </div>
             <section id="npm" role="tabpanel"><pre><code>npm install tagaction</code></pre></section>
             <section id="cdn" role="tabpanel"><p>Add the script tag.</p></section>
-            <section id="download" role="tabpanel"><p>Download tagaction.min.js.</p></section>
+            <section id="download" role="tabpanel"><p id="download-note">Download tagaction.min.js.</p></section>
         </section>
 
         <section id="faq">
@@ -68,6 +68,13 @@
             <li><a href="#coaching">Install</a></li>
             <li><a href="#faq">Frequently asked questions</a></li>
         </ul>
-    </main>
+      <section id="shortcut-demo">
+    <h2>Shortcuts</h2>
+    <search><input type="search" id="quick-search" aria-label="Search" aria-keyshortcuts="/"> <kbd>/</kbd></search>
+    <label for="note-field">Note</label><input id="note-field">
+    <button type="button" id="palette" aria-keyshortcuts="Control+K Meta+K" onclick="this.dataset.clicked = Number(this.dataset.clicked || 0) + 1">Commands</button>
+    <button type="button" id="off-shortcut" aria-keyshortcuts="G" disabled>Disabled</button>
+  </section>
+</main>
 </body>
 </html>

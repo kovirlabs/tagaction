@@ -9,6 +9,9 @@
 //   followed. Arrow keys move through its links.
 // - A link to something inside a closed <details> (an FAQ answer) opens it,
 //   on load and when the address's #fragment changes.
+// - Printing: every closed <details> (except header-nav dropdowns) opens
+//   for the printout, so a printed FAQ has its answers, and closes again
+//   afterwards. A name="…" group is lifted while printing so all can open.
 
 import { each, once, store } from '../core.js';
 import { arrowKeys } from './menu.js';
@@ -51,10 +54,28 @@ function dropdown(details) {
 const nativeGroups = () => 'name' in HTMLDetailsElement.prototype;
 const keyFor = (details) => `tagaction:details:${location.pathname}#${details.id}`;
 
+let printed = [];
+function beforePrint() {
+  printed = [...document.querySelectorAll('details:not([open])')]
+    .filter((details) => !details.closest('[data-tagaction="off"], header nav li'))
+    .map((details) => [details, details.getAttribute('name')]);
+  for (const [details] of printed) details.removeAttribute('name');
+  for (const [details] of printed) details.open = true;
+}
+function afterPrint() {
+  for (const [details, name] of printed) {
+    details.open = false;
+    if (name !== null) details.setAttribute('name', name);
+  }
+  printed = [];
+}
+
 export function init(root) {
   if (once(document, 'details-hash')) {
     addEventListener('hashchange', openTarget);
     openTarget();
+    addEventListener('beforeprint', beforePrint);
+    addEventListener('afterprint', afterPrint);
   }
 
   each(root, 'header nav li > details', 'details-dropdown', dropdown);

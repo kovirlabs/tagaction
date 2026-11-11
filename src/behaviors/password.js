@@ -1,6 +1,7 @@
 // <input type="password">: a Show/Hide button beside the field. The field goes
 // back to hidden characters when the form is sent, so password managers still
-// see a password field.
+// see a password field. Help text in a <small> after the field ends up after
+// the row the field now sits in, and the injected styles keep it under the row.
 
 import { each, h, idFor } from '../core.js';
 

@@ -1,6 +1,8 @@
 // <input type="file">:
 // - With `multiple`, the chosen file names are listed after the field
 //   (browsers only say "3 files").
+// - With accept="image/…", a thumbnail of each chosen picture shows in the
+//   same list (object URLs, revoked when the choice changes).
 // - Files can be dropped on the field or on its <label>.
 
 import { each, h, idFor, addToken } from '../core.js';
@@ -8,15 +10,26 @@ import { each, h, idFor, addToken } from '../core.js';
 export function init(root) {
   each(root, 'input[type="file"]', 'file', (input) => {
     let list = null;
+    let urls = [];
+    const images = input.matches('[accept^="image"]');
     const update = () => {
-      if (!input.multiple) return;
+      if (!input.multiple && !images) return;
       if (!list) {
         list = h('small', { 'data-tag': 'files', 'aria-live': 'polite' });
         const help = input.nextElementSibling?.matches('small:not([data-tag])') ? input.nextElementSibling : null;
         (help ?? input).after(list);
         addToken(input, 'aria-describedby', idFor(list));
       }
-      list.textContent = [...input.files].map((file) => file.name).join(', ');
+      for (const url of urls) URL.revokeObjectURL(url);
+      urls = [];
+      list.replaceChildren(...[...input.files].flatMap((file, index) => {
+        const parts = [index ? ', ' : ''];
+        if (images && file.type.startsWith('image/')) {
+          urls.push(URL.createObjectURL(file));
+          parts.push(h('img', { src: urls.at(-1), alt: '', 'data-tag': 'thumb' }));
+        }
+        return [...parts, file.name];
+      }));
     };
     input.addEventListener('change', update);
 
