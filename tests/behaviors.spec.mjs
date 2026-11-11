@@ -827,6 +827,28 @@ test.describe('theme switch', () => {
   });
 });
 
+test.describe('tabs and links', () => {
+  test('a link to a panel, or to something in it, selects its tab, on load and on hashchange', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.goto(page.url() + '#download-note');
+    await expect(page.locator('#tab-download')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#download')).toBeVisible();
+    await page.evaluate(() => { location.hash = 'npm'; });
+    await expect(page.locator('#tab-npm')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#cdn')).toBeHidden();
+  });
+
+  test('hidden panels are found by find-in-page: hidden="until-found", and beforematch selects the tab', async ({ page, browserName }) => {
+    await open(page, 'extras.html');
+    const supported = await page.evaluate(() => 'onbeforematch' in document.documentElement);
+    await expect(page.locator('#npm')).toHaveAttribute('hidden', supported ? 'until-found' : '');
+    test.skip(!supported, `${browserName}: no hidden="until-found"; panels use plain hidden`);
+    await page.locator('#npm').evaluate((panel) => panel.dispatchEvent(new Event('beforematch')));
+    await expect(page.locator('#tab-npm')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#npm')).not.toHaveAttribute('hidden', /.*/);
+  });
+});
+
 test.describe('keyboard shortcuts', () => {
   test('aria-keyshortcuts: "/" focuses the search box, Control+K clicks a button, typing in a field is left alone', async ({ page }) => {
     await open(page, 'extras.html');

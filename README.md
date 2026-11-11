@@ -31,7 +31,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
 | `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |
-| Tabs | Shows the selected panel; arrow keys, Home, End | `role="tablist"`, `role="tab"` with `aria-controls` |
+| Tabs | Shows the selected panel; arrow keys, Home, End; find-in-page and `#panel` links select a tab | `role="tablist"`, `role="tab"` with `aria-controls` |
 | Selectable rows | A header checkbox selects all shown rows, goes mixed, Shift-click selects a range | `<th><input type="checkbox">` |
 | Shortcuts | A key focuses a field or clicks a button (not while typing, unless it has a modifier) | `aria-keyshortcuts="/"`, `"Control+K Meta+K"` |
 | Theme | Light/dark switch, remembered (load the script without `defer` so the saved scheme applies before the first paint) | `<select data-tag-theme>` or `<button data-tag-theme>` |
