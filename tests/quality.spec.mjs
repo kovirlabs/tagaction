@@ -16,14 +16,18 @@ test.describe('without JavaScript', () => {
       await page.route(/tagbrush@[^/]+\/tagbrush(\.min)?\.css/, (route) => route.fulfill({ path: 'node_modules/tagbrush/tagbrush.css', contentType: 'text/css' }));
       await page.goto(fileUrl(`tests/fixtures/${fixture}`));
       // Lists that a dropdown button controls stay visible without TagAction.
-      for (const list of await page.locator('[aria-controls]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-controls')))) {
+      for (const list of await page.locator('button[aria-controls]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-controls')))) {
         const target = page.locator(`#${list}`);
         if (await target.count()) await expect(target).toBeVisible();
       }
-      // Only things that need TagAction may be hidden: --clone buttons, filter
-      // boxes with aria-controls, and tables of contents (empty until filled).
-      const hidden = await page.locator('body [hidden]').evaluateAll((els) => els.map((e) => e.outerHTML.slice(0, 80)));
-      for (const html of hidden) expect(html).toMatch(/command="--clone"|aria-controls=|data-tag-toc/);
+      // Only things that need TagAction may be hidden: --clone, --copy and
+      // --share buttons, filter boxes with aria-controls, theme switches, and
+      // tables of contents (empty until filled).
+      // A list a hidden search box controls is a results list, also JS-only.
+      const hidden = await page.locator('body [hidden]').evaluateAll((els) => els
+        .filter((e) => !(e.id && document.querySelector(`[hidden][aria-controls="${e.id}"]`)))
+        .map((e) => e.outerHTML.slice(0, 80)));
+      for (const html of hidden) expect(html).toMatch(/command="--(clone|copy|share)"|aria-controls=|data-tag-toc|data-tag-theme/);
     });
   }
 });
@@ -138,7 +142,9 @@ test.describe('accessibility of inserted UI', () => {
 });
 
 test.describe('size budget', () => {
-  const BUDGET = 8 * 1024;
+  // Coverage matters more than bytes (as for TagBrush.css); this ceiling only
+  // catches accidental bloat. Report the size in each release.
+  const BUDGET = 15 * 1024;
   test(`tagaction.min.js is at most ${BUDGET / 1024} KB gzipped`, () => {
     chromiumOnly();
     expect(gzipSync(readFileSync('tagaction.min.js'), { level: 9 }).length).toBeLessThanOrEqual(BUDGET);

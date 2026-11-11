@@ -6,10 +6,11 @@
 //   and buttons.
 // - Arrow keys, Home, and End also move through the items of a <menu> and of
 //   a popover menu (<div popover><nav><ul>…).
+// - A popover holding links closes when one is followed.
 
 import { each, focusables, reveal } from '../core.js';
 
-function arrowKeys(container, event, close) {
+export function arrowKeys(container, event, close) {
   const items = focusables(container);
   const index = items.indexOf(document.activeElement);
   let next;
@@ -64,6 +65,14 @@ export function init(root) {
     container.addEventListener('keydown', (event) => {
       if (event.defaultPrevented || event.target.matches('input, textarea, select')) return;
       arrowKeys(container, event);
+    });
+  });
+
+  // A popover of links (a phone menu, a user menu) closes when you follow one,
+  // so a link to a section on the same page isn't hidden behind the panel.
+  each(root, '[popover]:has(a[href])', 'popover-links', (popover) => {
+    popover.addEventListener('click', (event) => {
+      if (event.target.closest('a[href]') && popover.matches(':popover-open')) popover.hidePopover();
     });
   });
 }

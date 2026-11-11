@@ -12,16 +12,16 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 - **No new syntax.** It keys off native elements and attributes first, then ARIA attributes, then a few `data-tag-*` attributes. No classes, no templating, no components, no reactive state.
 - **Fills gaps, doesn't replace the browser.** Native `<details>`, `<dialog>`, `popover`, and `commandfor` do their own work.
 - **Works with htmx and anything else.** Content added after load is enhanced automatically.
-- **Small.** One file, no dependencies, about 7 KB gzipped.
+- **Small.** One file, no dependencies, about 9 KB gzipped.
 
 ## What it does
 
 | HTML | Behavior | Hook |
 | --- | --- | --- |
 | `<dialog>` | A modal closes on a backdrop click. Opens from a button with no script. | native `commandfor` / `command`; `closedby` opts out |
-| `<details>` | One open at a time; remembers open state | native `name`; `data-tag-remember` |
-| `<table>` | Click a header to sort; filter from a search box | `<thead>`; `aria-sort`; `<input aria-controls>` |
-| `<form>` | Messages under the fields; busy submit button; unsaved-changes warning | native validation; `method="post"` |
+| `<details>` | One open at a time; remembers open state; opens when a link points inside it; in the header nav, a dropdown that closes on Escape, a click outside, or a chosen link | native `name`; `data-tag-remember`; `#fragment` links; `<li><details>` in a header `<nav>` |
+| `<table>`, lists | Click a header to sort; filter from a search box; a list written `hidden` is search results | `<thead>`; `aria-sort`; `<input aria-controls>` |
+| `<form>` | Messages under the fields; busy submit button; unsaved-changes warning; a confirm field must match | native validation; `method="post"`; `data-tag-match` |
 | `<textarea>` | Grows as you type; character counter | no `rows`; `maxlength` |
 | `<input type="file">` | Lists chosen files; drag and drop | `multiple`; its `<label>` |
 | `<input type="password">` | Show/Hide button | automatic |
@@ -30,7 +30,10 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
 | `<img>` | Click to enlarge | a link to an image file; a shrunk image in `<figure>` |
-| `<menu>`, dropdowns | Arrow keys, Escape, click outside | `<button aria-expanded aria-controls>`; popover menus |
+| `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |
+| Tabs | Shows the selected panel; arrow keys, Home, End | `role="tablist"`, `role="tab"` with `aria-controls` |
+| Theme | Light/dark switch, remembered | `<select data-tag-theme>` or `<button data-tag-theme>` |
+| Copy, share | Copy any field or element; share a link or section | `<button commandfor command="--copy">`, `command="--share"` |
 | `<output>` | Live value, total, or product; currency and percent formatting | native `for`; `data-tag-calc="product"`, `data-tag-format="USD"` |
 | `<abbr>` | Title shown on tap | `title` |
 | `<template>` | Add repeated rows | `<button commandfor command="--clone">` |
@@ -97,7 +100,7 @@ Current Chrome, Edge, Firefox, and Safari. Where a browser lacks `commandfor`, e
 
 ## Tested with
 
-TagAction 0.2.0 is tested with TagBrush.css 1.2.0 (0.1.0 was tested with 1.1.0).
+TagAction 0.2.0 is tested with TagBrush.css 1.2.0 (0.1.0 was tested with 1.1.0). The unreleased changes are tested with TagBrush.css 1.2.0; tabs look best with the tab styles in the next TagBrush.css release.
 
 ## Development
 

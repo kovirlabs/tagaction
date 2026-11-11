@@ -474,3 +474,146 @@ test.describe('dynamic content', () => {
     await expect(page.getByRole('button', { name: 'Copy' })).toHaveCount(0);
   });
 });
+
+test.describe('dropdown details in the header nav', () => {
+  test('Escape, an outside click, and following a link close it; arrow keys move through it', async ({ page }) => {
+    await open(page, 'extras.html');
+    const services = page.locator('#services');
+    await page.locator('#services > summary').click();
+    await expect(services).toHaveJSProperty('open', true);
+    await page.keyboard.press('ArrowDown');
+    await expect(page.locator('#grants-link')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(services).toHaveJSProperty('open', false);
+    await expect(page.locator('#services > summary')).toBeFocused();
+
+    await page.locator('#services > summary').click();
+    await page.mouse.click(600, 700);
+    await expect(services).toHaveJSProperty('open', false);
+
+    await page.locator('#services > summary').click();
+    await page.locator('#grants-link').click();
+    await expect(services).toHaveJSProperty('open', false);
+  });
+
+  test('a details outside the header nav is left alone', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.locator('#plain > summary').click();
+    await page.mouse.click(600, 10);
+    await expect(page.locator('#plain')).toHaveJSProperty('open', true);
+  });
+});
+
+test.describe('phone menu', () => {
+  test('following a link in the popover closes it', async ({ page }) => {
+    await open(page, 'extras.html', { width: 390 });
+    await page.click('#menu-button');
+    await expect(page.locator('#menu')).toBeVisible();
+    await page.click('#faq-link');
+    await expect(page.locator('#menu')).toBeHidden();
+  });
+});
+
+test.describe('links into a closed details', () => {
+  test('a link to an answer opens its details, on load and on hash change', async ({ page }) => {
+    await open(page, 'extras.html');
+    await expect(page.locator('#q-free')).toHaveJSProperty('open', false);
+    await page.evaluate(() => { location.hash = '#free-answer'; });
+    await expect(page.locator('#q-free')).toHaveJSProperty('open', true);
+    await page.goto(page.url().replace(/#.*$/, '') + '#q-offline');
+    await expect(page.locator('#q-offline')).toHaveJSProperty('open', true);
+  });
+});
+
+test.describe('copy and share commands', () => {
+  test('--copy copies a field value or an element\'s text and says so', async ({ page, context, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Clipboard permissions are granted in Chromium');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await open(page, 'extras.html');
+    await expect(page.locator('#copy-invite')).toBeVisible();
+    await page.click('#copy-invite');
+    await expect(page.locator('#copy-invite')).toHaveText('Copied');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('https://lumen.example/join/4F7Q');
+    await page.click('#copy-key');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('sk_live_51H8');
+    await expect(page.locator('#copy-invite')).toHaveText('Copy', { timeout: 3000 });
+  });
+
+  test('--share uses the share sheet with the section link, or copies it', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.evaluate(() => {
+      window.shared = null;
+      navigator.share = async (data) => { window.shared = data; };
+    });
+    await page.click('#share');
+    await expect.poll(() => page.evaluate(() => window.shared?.url)).toMatch(/extras\.html#grants$/);
+    await page.evaluate(() => { delete navigator.share; Object.defineProperty(navigator, 'share', { value: undefined }); });
+    await page.click('#share');
+    await expect(page.locator('#share')).toHaveText(/Link copied|Copy failed/);
+  });
+});
+
+test.describe('theme switch', () => {
+  test('a select and a button set data-theme on html and remember it', async ({ page }) => {
+    await open(page, 'extras.html');
+    await expect(page.locator('#theme-select')).toBeVisible();
+    await page.selectOption('#theme-select', 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('#theme-button')).toHaveAttribute('aria-pressed', 'true');
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('#theme-select')).toHaveValue('dark');
+    await page.click('#theme-button');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.selectOption('#theme-select', '');
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
+  });
+});
+
+test.describe('tabs', () => {
+  test('only the selected panel shows, and arrow keys, Home and End move between tabs', async ({ page }) => {
+    await open(page, 'extras.html');
+    await expect(page.locator('#cdn')).toBeVisible();
+    await expect(page.locator('#npm')).toBeHidden();
+    await expect(page.locator('#tab-cdn')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#cdn')).toHaveAttribute('aria-labelledby', 'tab-cdn');
+    await page.locator('#tab-cdn').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#tab-download')).toBeFocused();
+    await expect(page.locator('#download')).toBeVisible();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#tab-npm')).toBeFocused();
+    await page.keyboard.press('End');
+    await expect(page.locator('#download')).toBeVisible();
+    await page.click('#tab-npm');
+    await expect(page.locator('#npm')).toBeVisible();
+    await expect(page.locator('#tab-npm')).toHaveAttribute('tabindex', '0');
+    await expect(page.locator('#tab-cdn')).toHaveAttribute('tabindex', '-1');
+  });
+});
+
+test.describe('matching fields', () => {
+  test('a confirm field is invalid until it matches, and the message clears when it does', async ({ page }) => {
+    await open(page, 'extras.html');
+    await page.fill('#password', 'correct horse');
+    await page.fill('#confirm', 'correct hose');
+    expect(await page.locator('#confirm').evaluate((f) => f.validationMessage)).toBe("Doesn't match Password.");
+    await page.getByRole('button', { name: 'Sign up' }).click();
+    await expect(page.locator('#confirm')).toHaveAttribute('aria-invalid', 'true');
+    await page.fill('#password', 'correct hose');
+    await expect(page.locator('#confirm')).not.toHaveAttribute('aria-invalid', 'true');
+  });
+});
+
+test.describe('search results list', () => {
+  test('a list written hidden shows only matches, and only while there is a search', async ({ page }) => {
+    await open(page, 'extras.html');
+    await expect(page.locator('#site-search')).toBeVisible();
+    await expect(page.locator('#pages')).toBeHidden();
+    await page.fill('#site-search', 'install');
+    await expect(page.locator('#pages')).toBeVisible();
+    await expect(page.locator('#pages li:visible')).toHaveCount(1);
+    await page.fill('#site-search', '');
+    await expect(page.locator('#pages')).toBeHidden();
+  });
+});

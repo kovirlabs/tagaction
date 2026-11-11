@@ -21,10 +21,14 @@ import { init as menu } from './behaviors/menu.js';
 import { init as output } from './behaviors/output.js';
 import { init as abbr } from './behaviors/abbr.js';
 import { init as template } from './behaviors/template.js';
+import { init as clipboard } from './behaviors/clipboard.js';
+import { init as theme } from './behaviors/theme.js';
+import { init as tabs } from './behaviors/tabs.js';
+import { init as match } from './behaviors/match.js';
 
 // Order matters in one place: headings build tables of contents before nav
 // decides which navs follow the scroll.
-const behaviors = [command, dialog, details, table, form, textarea, file, password, code, time, headings, nav, img, menu, output, abbr, template];
+const behaviors = [command, theme, dialog, details, table, form, match, textarea, file, password, code, time, headings, nav, img, menu, output, abbr, template, clipboard, tabs];
 
 const VERSION = '__VERSION__';
 
