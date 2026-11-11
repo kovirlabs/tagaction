@@ -476,7 +476,8 @@
         if (!firstInvalid) {
           firstInvalid = field;
           setTimeout(() => {
-            firstInvalid.focus();
+            firstInvalid.focus({ preventScroll: true });
+            firstInvalid.scrollIntoView({ block: "center" });
             firstInvalid = null;
           });
         }

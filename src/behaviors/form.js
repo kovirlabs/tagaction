@@ -75,7 +75,13 @@ export function init(root) {
       if (!firstInvalid) {
         firstInvalid = field;
         // After every field has reported (each 'invalid' event runs its own microtasks).
-        setTimeout(() => { firstInvalid.focus(); firstInvalid = null; });
+        // Focus it in the middle of the window, clear of a sticky top bar
+        // (WebKit's own focus scroll can stop under one).
+        setTimeout(() => {
+          firstInvalid.focus({ preventScroll: true });
+          firstInvalid.scrollIntoView({ block: 'center' });
+          firstInvalid = null;
+        });
       }
     }, true);
 

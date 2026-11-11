@@ -26,6 +26,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - Select all: a checkbox in a `<thead>` cell checks or clears the checkboxes in its column for every shown row (rows a filter hides are left alone), is indeterminate when only some are checked, and Shift-click on a row's box sets the range from the last one clicked. Rows added later count. A header cell holding a control no longer gets wrapped in a sort button.
 - Printing opens every closed `<details>` (header-nav dropdowns excepted), name groups included, so a printed FAQ has its answers; they close again after printing.
 - Tabs: hidden panels use `hidden="until-found"` where supported, so find-in-page reaches their text and `beforematch` selects their tab; a link to a panel or to anything in it selects its tab, on load and when the `#fragment` changes.
+- The first invalid field is scrolled to the middle of the window when it's focused, so a sticky top bar (TagBrush.css's `<header data-layout="sticky">`) never covers it; WebKit's own focus scroll can stop a few pixels under one.
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

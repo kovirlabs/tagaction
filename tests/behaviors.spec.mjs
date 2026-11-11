@@ -252,6 +252,22 @@ test.describe('form', () => {
     await expect(page.locator('fieldset > small[data-tag="error"]')).toBeEmpty();
   });
 
+  test('the first invalid field is focused clear of a sticky top bar', async ({ page }) => {
+    await open(page, 'form.html', { width: 900, height: 500 });
+    // TagBrush.css's sticky bar (data-layout="sticky"), standing in for the published 1.x build.
+    await page.addStyleTag({ content: 'body > header { position: sticky; top: 0; height: 64px; background: Canvas; z-index: 1 } :root { scroll-padding-top: 5rem }' });
+    await page.evaluate(() => document.body.prepend(Object.assign(document.createElement('header'), { innerHTML: '<nav><strong>Site</strong></nav>' })));
+    await page.getByLabel('Email').fill('maya@example.com');
+    await page.getByLabel('Name').fill('Maya');
+    // The password is the first invalid field; start with it right under the bar.
+    await page.evaluate(() => scrollTo(0, document.querySelector('#password').getBoundingClientRect().top + scrollY - 20));
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page.locator('#password')).toBeFocused();
+    const [bar, field] = [await page.locator('body > header').boundingBox(), await page.locator('#password').boundingBox()];
+    expect(field.y).toBeGreaterThanOrEqual(bar.y + bar.height);
+    expect(field.y + field.height).toBeLessThanOrEqual(500);
+  });
+
   test('the password message goes under the password row, not inside it', async ({ page }) => {
     await open(page, 'form.html');
     await page.getByRole('button', { name: 'Create account' }).click();
