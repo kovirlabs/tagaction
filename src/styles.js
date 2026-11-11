@@ -16,6 +16,7 @@ const CSS = `@layer tagaction {
 :where(:has(> [data-tag="dropdown"]) > [aria-controls][aria-expanded]) { anchor-name: --tag-dropdown; }
 :where([data-tag="dropdown"]:not([hidden])) { position: fixed; position-anchor: --tag-dropdown; inset: auto; position-area: block-end span-inline-start; position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline; }
 }
+::highlight(tagaction-match) { background-color: var(--color-highlight, Mark); color: var(--color-text, MarkText); text-decoration: underline; }
 :where([data-tag="sort"]) { all: unset; display: inline-flex; align-items: center; gap: 0.35em; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }
 :where([data-tag="sort"]):focus-visible { outline: 2px solid var(--color-primary, Highlight); outline-offset: 2px; border-radius: 2px; }
 :where([data-tag="sort"])::after { content: "↕" / ""; opacity: 0.45; font-size: 0.85em; }

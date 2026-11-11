@@ -156,6 +156,17 @@ test.describe('table', () => {
     await expect(page.locator('#colors + [role="status"]')).toHaveText('No matches for “green”');
   });
 
+  test('matching words are highlighted without changing the HTML', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.getByLabel('Filter orders').fill('ma lin');
+    const ranges = () => page.evaluate(() => [...(CSS.highlights.get('tagaction-match') ?? [])].map((r) => r.toString()));
+    await expect.poll(ranges).toEqual(expect.arrayContaining(['Ma', 'Lin']));
+    await expect(page.locator('#orders mark, #orders span')).toHaveCount(0); // nothing wrapped
+    expect((await ranges()).every((text) => /^(ma|lin)$/i.test(text))).toBe(true);
+    await page.getByLabel('Filter orders').fill('');
+    await expect.poll(ranges).toEqual([]);
+  });
+
   test('a filter box with a name starts from the address and keeps it up to date', async ({ page }) => {
     await open(page, 'table.html');
     await page.goto(page.url() + '?orders=maya#top');

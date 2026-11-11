@@ -22,6 +22,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - Keyboard shortcuts from `aria-keyshortcuts`: the key it names focuses a field (`"/"` for search) or clicks a button (`"Control+K Meta+K"`). Keys without Control, Alt, or Meta are ignored while you type in a field; hidden and disabled elements are skipped.
 - `<input type="file" accept="image/*">` shows a thumbnail of each chosen picture in its file list (object URLs, revoked when the choice changes).
 - A filter box with a `name` starts from `?name=…` in the address and keeps it up to date with `history.replaceState`, so a filtered table survives a reload and can be shared. Without a `name` the address is left alone.
+- Filter matches are highlighted with the CSS Custom Highlight API (`::highlight(tagaction-match)`, the theme's highlight color with an underline), without changing the page's HTML; browsers without it show no highlight (modern-web-guidance `highlight-text-ranges`).
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

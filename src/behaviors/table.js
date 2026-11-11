@@ -9,6 +9,8 @@
 //   A role="status" line after the table or list says "No matches for …"
 //   when nothing matches, and otherwise tells screen readers how many rows
 //   are shown ("3 of 12 shown") while staying out of sight.
+//   Matching words are highlighted with the CSS Custom Highlight API
+//   (::highlight(tagaction-match)), without changing the page's HTML.
 //   A filter box with a name starts from ?name=… in the address and keeps
 //   it up to date (history.replaceState), so a filtered view survives a
 //   reload and can be shared.
@@ -98,6 +100,33 @@ function statusFor(target) {
   return status;
 }
 
+// Highlighted ranges per filtered element, joined into one named highlight.
+const matches = new Map();
+function highlight(target, items, words) {
+  if (!globalThis.CSS?.highlights || typeof Highlight === 'undefined') return;
+  const ranges = [];
+  for (const item of items) {
+    if (item.hidden || !words.length) continue;
+    const walker = document.createTreeWalker(item, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node.data.toLowerCase();
+      for (const word of words) {
+        for (let at = text.indexOf(word); at !== -1; at = text.indexOf(word, at + word.length)) {
+          const range = new Range();
+          range.setStart(node, at);
+          range.setEnd(node, at + word.length);
+          ranges.push(range);
+        }
+      }
+    }
+  }
+  matches.set(target, ranges);
+  for (const element of matches.keys()) if (!element.isConnected) matches.delete(element);
+  const all = [...matches.values()].flat();
+  if (all.length) CSS.highlights.set('tagaction-match', new Highlight(...all));
+  else CSS.highlights.delete('tagaction-match');
+}
+
 function filter(control, target) {
   const words = control.value.toLowerCase().split(/\s+/).filter(Boolean);
   if (results.has(target)) target.hidden = !words.length;
@@ -108,6 +137,7 @@ function filter(control, target) {
     item.hidden = !words.every((word) => text.includes(word));
     if (!item.hidden) shown++;
   }
+  highlight(target, items, words);
   // "No matches" shows at once; the count for screen readers waits for a
   // pause in typing, so it isn't announced on every keystroke.
   const status = statusFor(target);
