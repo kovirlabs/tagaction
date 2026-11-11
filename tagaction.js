@@ -308,8 +308,11 @@
     if (a === "" || b === "") return a === "" ? b === "" ? 0 : 1 : -1;
     return collator.compare(a, b);
   }
-  function sort(table, header) {
-    const descending = header.getAttribute("aria-sort") === "ascending";
+  var sortKeyFor = (table) => `tagaction:sort:${location.pathname}#${table.id}`;
+  var remembered = (table) => table.id && table.closest("[data-tag-remember]");
+  function sort(table, header, order) {
+    const descending = order ? order === "descending" : header.getAttribute("aria-sort") === "ascending";
+    if (remembered(table)) store.set(sortKeyFor(table), `${header.cellIndex} ${descending ? "descending" : "ascending"}`);
     for (const th of header.parentElement.children) th.removeAttribute("aria-sort");
     header.setAttribute("aria-sort", descending ? "descending" : "ascending");
     const index = header.cellIndex;
@@ -387,6 +390,11 @@
         button.append(...th.childNodes);
         th.append(button);
         button.addEventListener("click", () => sort(table, th));
+      }
+      if (remembered(table)) {
+        const [index, order] = (store.get(sortKeyFor(table)) ?? "").split(" ");
+        const th = headerRow.cells[Number(index)];
+        if (th?.querySelector(':scope > [data-tag="sort"]') && (order === "ascending" || order === "descending")) sort(table, th, order);
       }
     });
     each(root, "tbody > tr", "num-row", (row) => {

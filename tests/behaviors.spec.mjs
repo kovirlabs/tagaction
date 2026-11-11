@@ -118,6 +118,18 @@ test.describe('table', () => {
     await expect(page.locator('#late td[data-tag="num"]')).toHaveCount(2);
   });
 
+  test('under data-tag-remember a table keeps its sort order across visits; other tables do not', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.locator('#kept').getByRole('button', { name: 'Seats' }).click();
+    await page.locator('#kept').getByRole('button', { name: 'Seats' }).click();
+    expect(await column(page, 'kept', 2)).toEqual(['10', '5', '1']);
+    await page.locator('#numbers').getByRole('button', { name: 'Count' }).click();
+    await page.reload();
+    expect(await column(page, 'kept', 2)).toEqual(['10', '5', '1']);
+    await expect(page.locator('#kept th').nth(1)).toHaveAttribute('aria-sort', 'descending');
+    expect(await column(page, 'numbers', 2)).toEqual(['1,200', '900', '15']); // not remembered: source order
+  });
+
   test('keyboard: header buttons sort with Enter and Space', async ({ page }) => {
     await open(page, 'table.html');
     await page.locator('#numbers').getByRole('button', { name: 'Item' }).focus();

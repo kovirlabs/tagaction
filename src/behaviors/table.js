@@ -3,6 +3,8 @@
 //   each header cell. Clicking sorts ascending, then descending, and sets
 //   aria-sort. Numbers sort as numbers; <data value>, <time datetime>, and
 //   <meter>/<progress> values in a cell are used as its sort key.
+//   Under data-tag-remember (on the table or a container), a table with an
+//   id keeps its sort order across visits.
 // - Filtering: <input type="search" aria-controls="table-id"> hides rows that
 //   don't contain every typed word. It also filters the <li>s of a list. A
 //   list written with `hidden` shows only while there's a search (results).
@@ -19,7 +21,7 @@
 //   injected styles line it up on the right in tabular figures. An align
 //   attribute or the page's own text-align wins.
 
-import { each, h, reveal } from '../core.js';
+import { each, h, reveal, store } from '../core.js';
 
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 const NUMBER = /^[^\d\s-]{0,3}\s*[-−]?\d[\d,\s]*(\.\d+)?\s*[%a-zA-Z]{0,3}$/;
@@ -74,8 +76,12 @@ function compare(a, b) {
   return collator.compare(a, b);
 }
 
-function sort(table, header) {
-  const descending = header.getAttribute('aria-sort') === 'ascending';
+const sortKeyFor = (table) => `tagaction:sort:${location.pathname}#${table.id}`;
+const remembered = (table) => table.id && table.closest('[data-tag-remember]');
+
+function sort(table, header, order) {
+  const descending = order ? order === 'descending' : header.getAttribute('aria-sort') === 'ascending';
+  if (remembered(table)) store.set(sortKeyFor(table), `${header.cellIndex} ${descending ? 'descending' : 'ascending'}`);
   for (const th of header.parentElement.children) th.removeAttribute('aria-sort');
   header.setAttribute('aria-sort', descending ? 'descending' : 'ascending');
   const index = header.cellIndex;
@@ -159,6 +165,11 @@ export function init(root) {
       button.append(...th.childNodes);
       th.append(button);
       button.addEventListener('click', () => sort(table, th));
+    }
+    if (remembered(table)) {
+      const [index, order] = (store.get(sortKeyFor(table)) ?? '').split(' ');
+      const th = headerRow.cells[Number(index)];
+      if (th?.querySelector(':scope > [data-tag="sort"]') && (order === 'ascending' || order === 'descending')) sort(table, th, order);
     }
   });
 

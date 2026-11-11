@@ -19,7 +19,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | HTML | Behavior | Hook |
 | --- | --- | --- |
 | `<dialog>` | A modal closes on a backdrop click. Opens from a button with no script. | native `commandfor` / `command`; `closedby` opts out |
-| `<details>` | One open at a time; remembers open state; opens when a link points inside it; all open for printing; in the header nav, a dropdown that closes on Escape, a click outside, or a chosen link | native `name`; `data-tag-remember`; `#fragment` links; `<li><details>` in a header `<nav>` |
+| `<details>` | One open at a time; remembers open state; opens when a link points inside it; all open for printing; in the header nav, a dropdown that closes on Escape, a click outside, or a chosen link | native `name`; `data-tag-remember` (also keeps a table's sort order); `#fragment` links; `<li><details>` in a header `<nav>` |
 | `<table>`, lists | Click a header to sort; columns of numbers line up on the right; filter from a search box (matches highlighted, with "No matches" and a count for screen readers; a `name` keeps it in the address); a list written `hidden` is search results | `<thead>`; `aria-sort`; `<input aria-controls>` |
 | `<form>` | Messages under the fields; busy submit button; unsaved-changes warning; a confirm field must match | native validation; `method="post"`; `data-tag-match` |
 | `<textarea>` | Grows as you type; character counter; Ctrl+Enter or ⌘+Enter sends its form (with validation, never mid-IME) | no `rows`; `maxlength` |
