@@ -358,7 +358,19 @@
       if (target.hidden && !target.matches("table")) results.add(target);
       reveal(control);
       statusFor(target);
-      control.addEventListener("input", () => filter(control, target));
+      const name = control.name;
+      if (name) {
+        const value = new URLSearchParams(location.search).get(name);
+        if (value !== null && !control.value) control.value = value;
+      }
+      control.addEventListener("input", () => {
+        filter(control, target);
+        if (!name) return;
+        const url = new URL(location.href);
+        if (control.value) url.searchParams.set(name, control.value);
+        else url.searchParams.delete(name);
+        history.replaceState(history.state, "", url);
+      });
       if (control.value) filter(control, target);
     });
   }

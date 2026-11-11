@@ -9,6 +9,9 @@
 //   A role="status" line after the table or list says "No matches for …"
 //   when nothing matches, and otherwise tells screen readers how many rows
 //   are shown ("3 of 12 shown") while staying out of sight.
+//   A filter box with a name starts from ?name=… in the address and keeps
+//   it up to date (history.replaceState), so a filtered view survives a
+//   reload and can be shared.
 // - Number columns: a column whose body cells all hold numbers (or a <data
 //   value> number) gets data-tag="num" on its header and cells, and the
 //   injected styles line it up on the right in tabular figures. An align
@@ -142,7 +145,19 @@ export function init(root) {
     if (target.hidden && !target.matches('table')) results.add(target);
     reveal(control);
     statusFor(target);
-    control.addEventListener('input', () => filter(control, target));
+    const name = control.name;
+    if (name) {
+      const value = new URLSearchParams(location.search).get(name);
+      if (value !== null && !control.value) control.value = value;
+    }
+    control.addEventListener('input', () => {
+      filter(control, target);
+      if (!name) return;
+      const url = new URL(location.href);
+      if (control.value) url.searchParams.set(name, control.value);
+      else url.searchParams.delete(name);
+      history.replaceState(history.state, '', url);
+    });
     if (control.value) filter(control, target);
   });
 }

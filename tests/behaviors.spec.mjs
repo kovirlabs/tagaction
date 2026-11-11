@@ -156,6 +156,23 @@ test.describe('table', () => {
     await expect(page.locator('#colors + [role="status"]')).toHaveText('No matches for “green”');
   });
 
+  test('a filter box with a name starts from the address and keeps it up to date', async ({ page }) => {
+    await open(page, 'table.html');
+    await page.goto(page.url() + '?orders=maya#top');
+    await expect(page.getByLabel('Filter orders')).toHaveValue('maya');
+    await expect(page.locator('#orders tbody tr:visible')).toHaveCount(1);
+    await page.getByLabel('Filter orders').fill('bo');
+    expect(new URL(page.url()).searchParams.get('orders')).toBe('bo');
+    expect(new URL(page.url()).hash).toBe('#top');
+    await page.reload();
+    await expect(page.locator('#orders tbody tr:visible')).toHaveCount(1);
+    await page.getByLabel('Filter orders').fill('');
+    expect(new URL(page.url()).searchParams.has('orders')).toBe(false);
+    // A filter box without a name leaves the address alone (false match).
+    await page.getByLabel('Filter fruit').fill('apple');
+    expect(new URL(page.url()).search).toBe('');
+  });
+
   test('a search input with aria-controls filters rows and list items', async ({ page }) => {
     await open(page, 'table.html');
     await page.getByLabel('Filter orders').fill('maya');
