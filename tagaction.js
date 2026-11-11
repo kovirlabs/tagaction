@@ -142,23 +142,23 @@
       if (!list || list.closest('[data-tagaction="off"]')) return;
       reveal(button);
       const isOpen = () => button.getAttribute("aria-expanded") === "true";
-      const set = (open) => {
+      const set2 = (open) => {
         button.setAttribute("aria-expanded", String(open));
         list.hidden = !open;
       };
       const close = (returnFocus) => {
         if (!isOpen()) return;
-        set(false);
+        set2(false);
         if (returnFocus) button.focus();
       };
       if (list.parentElement === button.parentElement && list.closest("nav")) list.setAttribute("data-tag", "dropdown");
-      set(isOpen());
-      button.addEventListener("click", () => set(!isOpen()));
+      set2(isOpen());
+      button.addEventListener("click", () => set2(!isOpen()));
       button.addEventListener("keydown", (event) => {
         if (event.key === "Escape") close(true);
         if (event.key === "ArrowDown") {
           event.preventDefault();
-          set(true);
+          set2(true);
           focusables(list)[0]?.focus();
         }
       });
@@ -367,7 +367,7 @@
       if (!headerRow) return;
       if (![...table.tBodies].some((body) => body.rows.length > 1)) return;
       for (const th of headerRow.cells) {
-        if (th.tagName !== "TH" || th.colSpan > 1 || th.dataset.tagaction === "off" || !th.textContent.trim()) continue;
+        if (th.tagName !== "TH" || th.colSpan > 1 || th.dataset.tagaction === "off" || !th.textContent.trim() || th.querySelector("input, button, select, a")) continue;
         const button = h("button", { type: "button", "data-tag": "sort" });
         button.append(...th.childNodes);
         th.append(button);
@@ -610,13 +610,13 @@
         "aria-label": "Show password"
       }, "Show");
       input.after(button);
-      const set = (visible) => {
+      const set2 = (visible) => {
         input.type = visible ? "text" : "password";
         button.setAttribute("aria-pressed", String(visible));
         button.textContent = visible ? "Hide" : "Show";
       };
-      button.addEventListener("click", () => set(input.type === "password"));
-      input.form?.addEventListener("submit", () => set(false));
+      button.addEventListener("click", () => set2(input.type === "password"));
+      input.form?.addEventListener("submit", () => set2(false));
     });
   }
 
@@ -969,8 +969,8 @@
     for (const control of find(document, "[data-tag-theme]")) sync(control);
   }
   function current() {
-    const set = document.documentElement.dataset.theme;
-    if (set === "light" || set === "dark") return set;
+    const set2 = document.documentElement.dataset.theme;
+    if (set2 === "light" || set2 === "dark") return set2;
     return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
   function sync(control) {
@@ -1085,10 +1085,54 @@
     });
   }
 
+  // src/behaviors/select.js
+  var boxes = (table, index) => [...table.tBodies].flatMap((body) => [...body.rows]).filter((row) => !row.hidden).map((row) => row.cells[index]?.querySelector('input[type="checkbox"]:not([role="switch"])')).filter((box) => box && !box.disabled);
+  function set(box, checked) {
+    if (box.checked === checked) return;
+    box.checked = checked;
+    box.dispatchEvent(new Event("input", { bubbles: true }));
+    box.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  function init23(root) {
+    each(root, 'thead th input[type="checkbox"]:not([role="switch"])', "select-all", (all) => {
+      const th = all.closest("th");
+      const table = th.closest("table");
+      const index = th.cellIndex;
+      let last = null;
+      let syncing = false;
+      const sync2 = () => {
+        const list = boxes(table, index);
+        const checked = list.filter((box) => box.checked).length;
+        all.checked = list.length > 0 && checked === list.length;
+        all.indeterminate = checked > 0 && checked < list.length;
+      };
+      all.addEventListener("change", () => {
+        syncing = true;
+        for (const box of boxes(table, index)) set(box, all.checked);
+        syncing = false;
+        sync2();
+      });
+      table.addEventListener("click", (event) => {
+        const box = event.target;
+        const list = boxes(table, index);
+        if (!list.includes(box)) return;
+        if (event.shiftKey && last && list.includes(last) && last !== box) {
+          const [from, to] = [list.indexOf(last), list.indexOf(box)].sort((a, b) => a - b);
+          for (const other of list.slice(from, to + 1)) set(other, box.checked);
+        }
+        last = box;
+      });
+      table.addEventListener("change", (event) => {
+        if (!syncing && event.target !== all) sync2();
+      });
+      sync2();
+    });
+  }
+
   // src/index.js
-  var behaviors = [init, init19, init2, init4, init5, init6, init21, init7, init8, init9, init10, init11, init12, init13, init14, init3, init15, init16, init17, init18, init20, init22];
+  var behaviors = [init, init19, init2, init4, init5, init6, init21, init7, init8, init9, init10, init11, init12, init13, init14, init3, init15, init16, init17, init18, init20, init22, init23];
   var VERSION = "0.2.0";
-  function init23(root = document) {
+  function init24(root = document) {
     for (const behavior of behaviors) {
       try {
         behavior(root);
@@ -1100,7 +1144,7 @@
   function start() {
     if (document.documentElement.dataset.tagaction === "off") return;
     addStyles();
-    init23(document);
+    init24(document);
     new MutationObserver((records) => {
       const added = /* @__PURE__ */ new Set();
       for (const record of records) {
@@ -1109,12 +1153,12 @@
       for (const node of added) {
         let covered = false;
         for (let parent = node.parentElement; parent && !covered; parent = parent.parentElement) covered = added.has(parent);
-        if (!covered && node.isConnected) init23(node);
+        if (!covered && node.isConnected) init24(node);
       }
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
   if (typeof window !== "undefined" && !window.TagAction) {
-    window.TagAction = { init: init23, version: VERSION };
+    window.TagAction = { init: init24, version: VERSION };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
     else start();
   }

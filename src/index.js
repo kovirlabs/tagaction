@@ -26,10 +26,11 @@ import { init as theme } from './behaviors/theme.js';
 import { init as tabs } from './behaviors/tabs.js';
 import { init as match } from './behaviors/match.js';
 import { init as shortcuts } from './behaviors/shortcuts.js';
+import { init as select } from './behaviors/select.js';
 
 // Order matters in one place: headings build tables of contents before nav
 // decides which navs follow the scroll.
-const behaviors = [command, theme, dialog, details, table, form, match, textarea, file, password, code, time, headings, nav, img, menu, output, abbr, template, clipboard, tabs, shortcuts];
+const behaviors = [command, theme, dialog, details, table, form, match, textarea, file, password, code, time, headings, nav, img, menu, output, abbr, template, clipboard, tabs, shortcuts, select];
 
 const VERSION = '__VERSION__';
 

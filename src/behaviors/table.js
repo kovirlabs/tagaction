@@ -154,7 +154,7 @@ export function init(root) {
     if (!headerRow) return;
     if (![...table.tBodies].some((body) => body.rows.length > 1)) return;
     for (const th of headerRow.cells) {
-      if (th.tagName !== 'TH' || th.colSpan > 1 || th.dataset.tagaction === 'off' || !th.textContent.trim()) continue;
+      if (th.tagName !== 'TH' || th.colSpan > 1 || th.dataset.tagaction === 'off' || !th.textContent.trim() || th.querySelector('input, button, select, a')) continue;
       const button = h('button', { type: 'button', 'data-tag': 'sort' });
       button.append(...th.childNodes);
       th.append(button);

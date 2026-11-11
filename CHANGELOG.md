@@ -23,6 +23,7 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - `<input type="file" accept="image/*">` shows a thumbnail of each chosen picture in its file list (object URLs, revoked when the choice changes).
 - A filter box with a `name` starts from `?name=…` in the address and keeps it up to date with `history.replaceState`, so a filtered table survives a reload and can be shared. Without a `name` the address is left alone.
 - Filter matches are highlighted with the CSS Custom Highlight API (`::highlight(tagaction-match)`, the theme's highlight color with an underline), without changing the page's HTML; browsers without it show no highlight (modern-web-guidance `highlight-text-ranges`).
+- Select all: a checkbox in a `<thead>` cell checks or clears the checkboxes in its column for every shown row (rows a filter hides are left alone), is indeterminate when only some are checked, and Shift-click on a row's box sets the range from the last one clicked. Rows added later count. A header cell holding a control no longer gets wrapped in a sort button.
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
 
 ## 0.2.0 (2026-11-08)

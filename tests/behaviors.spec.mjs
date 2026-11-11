@@ -167,6 +167,35 @@ test.describe('table', () => {
     await expect.poll(ranges).toEqual([]);
   });
 
+  test('select all: the header box checks shown rows, goes mixed, and Shift-click checks a range', async ({ page }) => {
+    await open(page, 'table.html');
+    const all = page.getByLabel('Select all users');
+    const rows = page.locator('#users tbody td:first-child input');
+    const state = () => all.evaluate((el) => (el.indeterminate ? 'mixed' : String(el.checked)));
+    // Mouse: one row makes the header mixed; the header checks the rest.
+    await page.getByLabel('Select Bo').check();
+    expect(await state()).toBe('mixed');
+    await all.click();
+    expect(await rows.evaluateAll((els) => els.every((el) => el.checked))).toBe(true);
+    expect(await state()).toBe('true');
+    await expect(page.getByLabel('Bo active')).not.toBeChecked(); // switches in other columns are untouched
+    // Keyboard: Space on the header clears every row.
+    await all.focus();
+    await page.keyboard.press('Space');
+    expect(await rows.evaluateAll((els) => els.some((el) => el.checked))).toBe(false);
+    expect(await state()).toBe('false');
+    // Shift-click checks the range between the last box clicked and this one.
+    await page.getByLabel('Select Maya').click();
+    await page.getByLabel('Select Ana').click({ modifiers: ['Shift'] });
+    expect(await rows.evaluateAll((els) => els.map((el) => el.checked))).toEqual([true, true, true, false]);
+    // A row added later counts.
+    await page.evaluate(() => document.querySelector('#users tbody').insertAdjacentHTML('beforeend', '<tr><td><input type="checkbox" aria-label="Select Lee"></td><td>Lee</td><td></td></tr>'));
+    await page.getByLabel('Select Lee').check();
+    expect(await state()).toBe('mixed');
+    // The header cell holding a checkbox gets no sort button.
+    await expect(page.locator('#users thead th:first-child [data-tag="sort"]')).toHaveCount(0);
+  });
+
   test('a filter box with a name starts from the address and keeps it up to date', async ({ page }) => {
     await open(page, 'table.html');
     await page.goto(page.url() + '?orders=maya#top');
