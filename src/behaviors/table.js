@@ -83,6 +83,7 @@ function sort(table, header) {
 
 const results = new WeakSet(); // lists written hidden: shown only while there's a search
 const statuses = new WeakMap(); // target -> its role="status" line
+const timers = new WeakMap(); // status line -> its pending count update
 
 function statusFor(target) {
   let status = statuses.get(target);
@@ -104,10 +105,14 @@ function filter(control, target) {
     item.hidden = !words.every((word) => text.includes(word));
     if (!item.hidden) shown++;
   }
+  // "No matches" shows at once; the count for screen readers waits for a
+  // pause in typing, so it isn't announced on every keystroke.
   const status = statusFor(target);
   const none = words.length > 0 && shown === 0;
+  clearTimeout(timers.get(status));
   status.toggleAttribute('data-tag-empty', none);
-  status.textContent = !words.length ? '' : none ? `No matches for “${control.value.trim()}”` : `${shown} of ${items.length} shown`;
+  if (!words.length || none) status.textContent = none ? `No matches for “${control.value.trim()}”` : '';
+  else timers.set(status, setTimeout(() => { status.textContent = `${shown} of ${items.length} shown`; }, 400));
 }
 
 export function init(root) {

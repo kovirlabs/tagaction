@@ -143,6 +143,8 @@ test.describe('table', () => {
     await expect(status).toBeVisible();
     expect((await status.boundingBox()).width).toBeGreaterThan(50);
     await filter.fill('maya');
+    // The count waits for a pause in typing (about 400 ms), so it isn't announced per keystroke.
+    expect(await status.textContent()).not.toBe('1 of 4 shown');
     await expect(status).toHaveText('1 of 4 shown');
     expect((await status.boundingBox()).width).toBeLessThanOrEqual(1); // for screen readers only
     await filter.fill('');

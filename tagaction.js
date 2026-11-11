@@ -306,6 +306,7 @@
   }
   var results = /* @__PURE__ */ new WeakSet();
   var statuses = /* @__PURE__ */ new WeakMap();
+  var timers = /* @__PURE__ */ new WeakMap();
   function statusFor(target) {
     let status = statuses.get(target);
     if (!status) {
@@ -327,8 +328,12 @@
     }
     const status = statusFor(target);
     const none = words.length > 0 && shown === 0;
+    clearTimeout(timers.get(status));
     status.toggleAttribute("data-tag-empty", none);
-    status.textContent = !words.length ? "" : none ? `No matches for \u201C${control.value.trim()}\u201D` : `${shown} of ${items.length} shown`;
+    if (!words.length || none) status.textContent = none ? `No matches for \u201C${control.value.trim()}\u201D` : "";
+    else timers.set(status, setTimeout(() => {
+      status.textContent = `${shown} of ${items.length} shown`;
+    }, 400));
   }
   function init5(root) {
     each(root, "table", "table", (table) => {
@@ -869,12 +874,12 @@
   }
 
   // src/behaviors/clipboard.js
-  var timers = /* @__PURE__ */ new WeakMap();
+  var timers2 = /* @__PURE__ */ new WeakMap();
   function say(button, text) {
     if (!button.dataset.tagLabel) button.dataset.tagLabel = button.textContent;
     button.textContent = text;
-    clearTimeout(timers.get(button));
-    timers.set(button, setTimeout(() => {
+    clearTimeout(timers2.get(button));
+    timers2.set(button, setTimeout(() => {
       button.textContent = button.dataset.tagLabel;
     }, 2e3));
   }
