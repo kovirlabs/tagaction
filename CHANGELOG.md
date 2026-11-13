@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-11-12)
 
 Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the phone menu), and things visitors expect on any site.
 
@@ -30,8 +30,6 @@ Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the 
 - Under `data-tag-remember`, a table with an `id` keeps its sort column and direction across visits, as `<details>` keep their open state.
 - The image viewer steps through a set: pictures in the same `<figure>`, or else the same `<section>`, get Previous and Next buttons, a "2 of 5" count, and the arrow keys. A picture on its own is unchanged.
 - Size: about 10 KB gzipped. The ceiling is now 15 KB: coverage matters more than bytes, as for TagBrush.css, and the size is reported in each release.
-
-## 0.2.0 (2026-11-08)
 
 Fixes from the family agent evaluation: `<output>` can multiply and format, and an empty table of contents stays hidden without JavaScript. Tested with TagBrush.css 1.2.0.
 
