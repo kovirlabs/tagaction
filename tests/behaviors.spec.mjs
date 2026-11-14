@@ -661,6 +661,38 @@ test.describe('code, time, abbr, output, template, details, img', () => {
 });
 
 test.describe('nav and headings', () => {
+  test('a sticky header\'s height goes into --tag-header-height, so a jumped-to heading lands below it', async ({ page }) => {
+    await open(page, 'blank.html', { width: 360, height: 700 });
+    // TagBrush.css 2's sticky bar and scroll padding, standing in for the pinned 1.x build.
+    await page.addStyleTag({ content: 'body > header[data-layout="sticky"] { position: sticky; top: 0; background: Canvas; z-index: 1 } :root { scroll-padding-top: calc(var(--tag-header-height, 4rem) + 1rem) }' });
+    const heightVar = () => page.evaluate(() => document.documentElement.style.getPropertyValue('--tag-header-height'));
+    expect(await heightVar()).toBe('');
+    // Inserted later (dynamic content), and three rows tall: more than any CSS default
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML('afterbegin', '<header data-layout="sticky"><p style="margin:0;height:50px">Site</p><nav style="height:50px"><a href="#target">Jump</a></nav><p style="margin:0;height:50px">Banner</p></header>');
+      document.querySelector('main').insertAdjacentHTML('beforeend', '<p style="height:150vh">Text</p><h2 id="target">Target</h2><p style="height:150vh">Text</p>');
+    });
+    const barHeight = () => page.locator('header').evaluate((el) => `${el.offsetHeight}px`);
+    const tall = await barHeight();
+    expect(parseFloat(tall)).toBeGreaterThan(150);
+    await expect.poll(heightVar).toBe(tall);
+    await page.getByRole('link', { name: 'Jump' }).click();
+    await page.waitForTimeout(100);
+    expect((await page.locator('#target').boundingBox()).y).toBeGreaterThanOrEqual(parseFloat(tall));
+    // It follows the bar when the bar changes size (a row wraps or goes away)
+    await page.evaluate(() => document.querySelector('header p:last-child').remove());
+    await expect.poll(heightVar).toBe(await barHeight());
+    expect(await heightVar()).not.toBe(tall);
+  });
+
+  test('a header that is not sticky, or is opted out, sets no height', async ({ page }) => {
+    await open(page, 'blank.html');
+    await page.evaluate(() => document.body.insertAdjacentHTML('afterbegin', '<header><nav><a href="#">Home</a></nav></header><div><header data-layout="sticky" data-tagaction="off"></header></div>'));
+    await page.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<header data-layout="sticky" data-tagaction="off"><p>Off</p></header>'));
+    await page.waitForTimeout(100);
+    expect(await page.evaluate(() => document.documentElement.style.getPropertyValue('--tag-header-height'))).toBe('');
+  });
+
   test('the current page link gets aria-current="page"; existing marks are kept', async ({ page }) => {
     await open(page, 'nav.html');
     await expect(page.locator('header nav a[aria-current="page"]')).toHaveText('Guide');

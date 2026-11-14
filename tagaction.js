@@ -789,6 +789,11 @@
       if (links.length >= 2 && links.length === nav.querySelectorAll("a[href]").length) followScroll(nav, links);
       else markCurrentPage(nav);
     });
+    each(root, 'body > header[data-layout="sticky"], body > :not([class]) > header[data-layout="sticky"]', "header-height", (header) => {
+      new ResizeObserver(() => {
+        if (header.isConnected) document.documentElement.style.setProperty("--tag-header-height", `${header.offsetHeight}px`);
+      }).observe(header);
+    });
   }
 
   // src/behaviors/img.js

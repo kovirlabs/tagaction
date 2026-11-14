@@ -75,8 +75,9 @@ test.describe('llms.txt contract', () => {
     }), snippets);
     expect(errors).toEqual([]);
     // Snippets for behaviors that only listen for events (dialogs, popover
-    // menus, details groups and remembered state, sort keys, shortcuts) don't change the HTML.
-    expect(unchanged.filter((html) => !/<dialog|popover|<details|<menu|<template|^<data |aria-keyshortcuts|^<th>/.test(html))).toEqual([]);
+    // menus, details groups and remembered state, sort keys, shortcuts) don't change the HTML,
+    // nor does the sticky bar (its height goes on <html>, and only for a page header).
+    expect(unchanged.filter((html) => !/<dialog|popover|<details|<menu|<template|^<data |aria-keyshortcuts|^<th>|data-layout="sticky"/.test(html))).toEqual([]);
   });
 });
 

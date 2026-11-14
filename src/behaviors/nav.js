@@ -3,6 +3,10 @@
 //   already marks one.
 // - In a nav of same-page links (a table of contents), the link to the section
 //   you are reading gets aria-current="true" as you scroll.
+// - A sticky page header (<header data-layout="sticky">, TagBrush.css's top
+//   bar) has its height kept in --tag-header-height on <html>, so the room
+//   TagBrush.css keeps above a heading you jump to fits the bar exactly,
+//   however many rows it wraps to.
 
 import { each } from '../core.js';
 
@@ -42,5 +46,10 @@ export function init(root) {
     const links = [...nav.querySelectorAll('a[href^="#"]')].filter((a) => a.hash.length > 1 && document.getElementById(decodeURIComponent(a.hash.slice(1))));
     if (links.length >= 2 && links.length === nav.querySelectorAll('a[href]').length) followScroll(nav, links);
     else markCurrentPage(nav);
+  });
+  each(root, 'body > header[data-layout="sticky"], body > :not([class]) > header[data-layout="sticky"]', 'header-height', (header) => {
+    new ResizeObserver(() => {
+      if (header.isConnected) document.documentElement.style.setProperty('--tag-header-height', `${header.offsetHeight}px`);
+    }).observe(header);
   });
 }
