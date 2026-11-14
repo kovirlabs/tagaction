@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- The Copy button on a `<pre>` no longer covers the code. A line too long for the block (the install line on the demo page) ran under the button, which sat over the end of the visible text ("defer" was hidden at 360px and 1280px). The `<pre>` now keeps a transparent 5rem end border for the button, instead of 5rem of end padding: its background shows through, but the code scrolls inside it, so it never passes under the button, at the start or scrolled to the end. The `<pre>` also scrolls sideways without a stylesheet.
+
 ## 0.2.0 (2026-11-12)
 
 Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the phone menu), and things visitors expect on any site.

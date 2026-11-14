@@ -25,7 +25,7 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<textarea>` | Grows as you type; character counter; Ctrl+Enter or ⌘+Enter sends its form (with validation, never mid-IME) | no `rows`; `maxlength` |
 | `<input type="file">` | Lists chosen files, with thumbnails of pictures; drag and drop | `multiple`; `accept="image/*"`; its `<label>` |
 | `<input type="password">` | Show/Hide button | automatic |
-| `<pre>` | Copy button | automatic |
+| `<pre>` | Copy button (the code scrolls clear of it) | automatic |
 | `<time>` | Reader's timezone; "3 hours ago" | `datetime` with a zone; `data-tag-time="relative"` |
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |

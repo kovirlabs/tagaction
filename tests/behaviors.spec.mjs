@@ -462,6 +462,40 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await expect(page.locator('pre')).toHaveText('npm install tagaction'); // the button sits outside the <pre>
   });
 
+  for (const [width, stylesheet] of [[360, true], [700, true], [1000, true], [360, false]]) {
+    test(`the Copy button never covers the code: a long line at ${width}px, ${stylesheet ? 'with TagBrush.css' : 'no stylesheet'}`, async ({ page }) => {
+      await open(page, 'blank.html', { width });
+      if (!stylesheet) await page.evaluate(() => document.querySelector('link[rel=stylesheet]').remove());
+      await page.evaluate(() => {
+        const pre = document.createElement('pre');
+        pre.innerHTML = '<code>&lt;script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer&gt;&lt;/script&gt;</code>';
+        document.querySelector('main').append(pre);
+      });
+      await expect(page.locator('[data-tag="copy"]')).toBeVisible();
+      // Text that shows (inside the <pre>'s scrollport) and sits under the button
+      const covered = () => page.evaluate(() => {
+        const pre = document.querySelector('pre');
+        const button = document.querySelector('[data-tag="copy"]').getBoundingClientRect();
+        const box = pre.getBoundingClientRect();
+        const style = getComputedStyle(pre);
+        const port = { left: box.left + parseFloat(style.borderLeftWidth), right: box.right - parseFloat(style.borderRightWidth) - (pre.offsetWidth - pre.clientWidth - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth)) };
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        return [...range.getClientRects()].some((r) => Math.min(r.right, port.right, button.right) > Math.max(r.left, port.left, button.left) && r.bottom > button.top && r.top < button.bottom);
+      });
+      expect(await covered(), 'at the start').toBe(false);
+      await page.locator('pre').evaluate((pre) => { pre.scrollLeft = pre.scrollWidth; });
+      expect(await covered(), 'scrolled to the end').toBe(false);
+      // The end of the line can be read: scrolled to the end, it ends left of the button
+      const [end, button] = await page.evaluate(() => {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector('pre code'));
+        return [Math.max(...[...range.getClientRects()].map((r) => r.right)), document.querySelector('[data-tag="copy"]').getBoundingClientRect().left];
+      });
+      expect(end).toBeLessThanOrEqual(button);
+    });
+  }
+
   test('time with a zone is localized; relative time; a plain date is left alone', async ({ browser }) => {
     const context = await browser.newContext({ timezoneId: 'America/New_York', locale: 'en-US' });
     const page = await context.newPage();

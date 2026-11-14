@@ -1,10 +1,13 @@
 // Styles for the few things TagAction adds to a page (copy buttons, sort
 // buttons, anchor links, counters). In a cascade layer and :where(), so any
 // page or TagBrush.css rule wins. TagBrush.css variables are used when present.
+// A <pre> with a Copy button keeps a transparent 5rem end border for the
+// button: the background shows through it, but the text scrolls inside it,
+// so the button never covers code.
 
 const CSS = `@layer tagaction {
 :where([data-tag="code"]) { position: relative; }
-:where([data-tag="code"] > pre) { padding-inline-end: 5rem; }
+:where([data-tag="code"] > pre) { overflow-x: auto; border-inline-end: 5rem solid transparent; }
 :where([data-tag="copy"]) { position: absolute; top: 0.4rem; right: 0.4rem; margin: 0; padding: 0.15rem 0.6rem; font-size: 0.8rem; line-height: 1.5; background: var(--color-surface, Canvas); }
 :where(:has(> [data-tag="dropdown"])) { position: relative; }
 :where([data-tag="dropdown"]:not([hidden])) { position: absolute; z-index: 10; top: 100%; right: 0; min-width: 12rem; margin: 0.25rem 0 0; padding: 0.5rem; display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem; list-style: none; background: var(--color-surface, Canvas); border: 1px solid var(--color-border, GrayText); border-radius: var(--border-radius, 0.5rem); box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); }
