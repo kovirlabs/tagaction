@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The demo page shows what 0.2.0 added: a `<details>` dropdown in the header nav, a link that opens a closed FAQ answer, a link that selects a tab, a Share button (`command="--share"`), search results from a hidden list with a Ctrl+K shortcut, select-all checkboxes, a plain number column lined up on the right, a filter kept in the address (`name="q"`) with its highlight and "No matches" line, a remembered sort (`data-tag-remember` on the table), a confirm-password field (`data-tag-match`), help text after a password field, an image file input with thumbnails, a red Delete in the confirm dialog, and two pictures in one figure that the viewer steps through. It now loads TagBrush.css 2 (`tagbrush@2`), which styles the header dropdown, tabs, selected rows, and toggle buttons these use.
+
 ## 0.2.0 (2026-11-12)
 
 Behaviors for the patterns TagBrush.css gained (dropdowns from `<details>`, the phone menu), and things visitors expect on any site.
