@@ -32,9 +32,10 @@ Add this to `<head>` (with or without TagBrush.css, which it is designed to sit 
 - `<textarea>` without `rows` grows as you type. With `maxlength`, a counter shows how many characters are used: `<textarea maxlength="280"></textarea>`. The counter goes after the field's help `<small>`, if it has one. In a form, Ctrl+Enter (⌘+Enter on a Mac) sends it, with validation; keep a submit button.
 - `<input type="file" multiple>` lists the chosen file names; with `accept="image/*"` it also shows a thumbnail of each picture. Files can be dropped onto any file input or its `<label>`.
 - `<input type="password">` gets a Show/Hide button.
-- `<pre>` gets a Copy button.
+- `<pre>` gets a Copy button, in a strip at its end that the code scrolls clear of.
 - `<time datetime="2026-11-06T17:00Z">Nov 6, 5 PM UTC</time>`: a time with a timezone is shown in the reader's own timezone and language.
 - `<nav>`: the link to the current page gets `aria-current="page"` (unless one is already marked). In a nav whose links all point to sections of the page, the link to the section on screen gets `aria-current="true"` as you scroll.
+- Sticky top bar: `<header data-layout="sticky"><nav>…</nav></header>` (TagBrush.css) has its height kept in `--tag-header-height` on `<html>`, so a heading you jump to lands just below the bar, however many rows it wraps to.
 - `<h2>` and `<h3>` with an `id` get a "#" link to the section.
 - Images: a link around an image that points to an image file (a URL ending in `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.gif`, or `.svg`) opens it in a viewer instead of a new page: `<a href="photo-large.jpg"><img src="photo.jpg" alt="Harbor at dusk"></a>`. An image in a `<figure>` shown smaller than its real size opens in the viewer when clicked. Pictures in the same `<figure>`, or else the same `<section>`, form a set: the viewer steps through them with Previous and Next and the arrow keys.
 - `<abbr title="HyperText Markup Language">HTML</abbr>`: tapping it shows the title in brackets, for touch screens.

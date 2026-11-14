@@ -25,9 +25,10 @@ TagAction is the companion to [TagBrush.css](https://github.com/kovirlabs/tagbru
 | `<textarea>` | Grows as you type; character counter; Ctrl+Enter or ⌘+Enter sends its form (with validation, never mid-IME) | no `rows`; `maxlength` |
 | `<input type="file">` | Lists chosen files, with thumbnails of pictures; drag and drop | `multiple`; `accept="image/*"`; its `<label>` |
 | `<input type="password">` | Show/Hide button | automatic |
-| `<pre>` | Copy button | automatic |
+| `<pre>` | Copy button (the code scrolls clear of it) | automatic |
 | `<time>` | Reader's timezone; "3 hours ago" | `datetime` with a zone; `data-tag-time="relative"` |
 | `<nav>`, `<a>` | `aria-current="page"`; follows the scroll in a table of contents | automatic |
+| `<header data-layout="sticky">` | its height in `--tag-header-height`, which TagBrush.css's scroll padding reads, so a jumped-to heading lands below the bar | TagBrush.css's sticky bar |
 | `<h2>`, `<h3>` | "#" links; generated table of contents | `id`; `<nav data-tag-toc hidden>` |
 | `<img>` | Click to enlarge; step through the pictures of a figure or section | a link to an image file; a shrunk image in `<figure>` |
 | `<menu>`, dropdowns | Arrow keys, Escape, click outside; a popover of links closes when one is followed | `<button aria-expanded aria-controls>`; popover menus |

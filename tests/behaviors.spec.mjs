@@ -462,6 +462,40 @@ test.describe('code, time, abbr, output, template, details, img', () => {
     await expect(page.locator('pre')).toHaveText('npm install tagaction'); // the button sits outside the <pre>
   });
 
+  for (const [width, stylesheet] of [[360, true], [700, true], [1000, true], [360, false]]) {
+    test(`the Copy button never covers the code: a long line at ${width}px, ${stylesheet ? 'with TagBrush.css' : 'no stylesheet'}`, async ({ page }) => {
+      await open(page, 'blank.html', { width });
+      if (!stylesheet) await page.evaluate(() => document.querySelector('link[rel=stylesheet]').remove());
+      await page.evaluate(() => {
+        const pre = document.createElement('pre');
+        pre.innerHTML = '<code>&lt;script src="https://cdn.jsdelivr.net/npm/tagaction@0/tagaction.min.js" defer&gt;&lt;/script&gt;</code>';
+        document.querySelector('main').append(pre);
+      });
+      await expect(page.locator('[data-tag="copy"]')).toBeVisible();
+      // Text that shows (inside the <pre>'s scrollport) and sits under the button
+      const covered = () => page.evaluate(() => {
+        const pre = document.querySelector('pre');
+        const button = document.querySelector('[data-tag="copy"]').getBoundingClientRect();
+        const box = pre.getBoundingClientRect();
+        const style = getComputedStyle(pre);
+        const port = { left: box.left + parseFloat(style.borderLeftWidth), right: box.right - parseFloat(style.borderRightWidth) - (pre.offsetWidth - pre.clientWidth - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth)) };
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        return [...range.getClientRects()].some((r) => Math.min(r.right, port.right, button.right) > Math.max(r.left, port.left, button.left) && r.bottom > button.top && r.top < button.bottom);
+      });
+      expect(await covered(), 'at the start').toBe(false);
+      await page.locator('pre').evaluate((pre) => { pre.scrollLeft = pre.scrollWidth; });
+      expect(await covered(), 'scrolled to the end').toBe(false);
+      // The end of the line can be read: scrolled to the end, it ends left of the button
+      const [end, button] = await page.evaluate(() => {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector('pre code'));
+        return [Math.max(...[...range.getClientRects()].map((r) => r.right)), document.querySelector('[data-tag="copy"]').getBoundingClientRect().left];
+      });
+      expect(end).toBeLessThanOrEqual(button);
+    });
+  }
+
   test('time with a zone is localized; relative time; a plain date is left alone', async ({ browser }) => {
     const context = await browser.newContext({ timezoneId: 'America/New_York', locale: 'en-US' });
     const page = await context.newPage();
@@ -627,6 +661,38 @@ test.describe('code, time, abbr, output, template, details, img', () => {
 });
 
 test.describe('nav and headings', () => {
+  test('a sticky header\'s height goes into --tag-header-height, so a jumped-to heading lands below it', async ({ page }) => {
+    await open(page, 'blank.html', { width: 360, height: 700 });
+    // TagBrush.css 2's sticky bar and scroll padding, standing in for the pinned 1.x build.
+    await page.addStyleTag({ content: 'body > header[data-layout="sticky"] { position: sticky; top: 0; background: Canvas; z-index: 1 } :root { scroll-padding-top: calc(var(--tag-header-height, 4rem) + 1rem) }' });
+    const heightVar = () => page.evaluate(() => document.documentElement.style.getPropertyValue('--tag-header-height'));
+    expect(await heightVar()).toBe('');
+    // Inserted later (dynamic content), and three rows tall: more than any CSS default
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML('afterbegin', '<header data-layout="sticky"><p style="margin:0;height:50px">Site</p><nav style="height:50px"><a href="#target">Jump</a></nav><p style="margin:0;height:50px">Banner</p></header>');
+      document.querySelector('main').insertAdjacentHTML('beforeend', '<p style="height:150vh">Text</p><h2 id="target">Target</h2><p style="height:150vh">Text</p>');
+    });
+    const barHeight = () => page.locator('header').evaluate((el) => `${el.offsetHeight}px`);
+    const tall = await barHeight();
+    expect(parseFloat(tall)).toBeGreaterThan(150);
+    await expect.poll(heightVar).toBe(tall);
+    await page.getByRole('link', { name: 'Jump' }).click();
+    await page.waitForTimeout(100);
+    expect((await page.locator('#target').boundingBox()).y).toBeGreaterThanOrEqual(parseFloat(tall));
+    // It follows the bar when the bar changes size (a row wraps or goes away)
+    await page.evaluate(() => document.querySelector('header p:last-child').remove());
+    await expect.poll(heightVar).toBe(await barHeight());
+    expect(await heightVar()).not.toBe(tall);
+  });
+
+  test('a header that is not sticky, or is opted out, sets no height', async ({ page }) => {
+    await open(page, 'blank.html');
+    await page.evaluate(() => document.body.insertAdjacentHTML('afterbegin', '<header><nav><a href="#">Home</a></nav></header><div><header data-layout="sticky" data-tagaction="off"></header></div>'));
+    await page.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<header data-layout="sticky" data-tagaction="off"><p>Off</p></header>'));
+    await page.waitForTimeout(100);
+    expect(await page.evaluate(() => document.documentElement.style.getPropertyValue('--tag-header-height'))).toBe('');
+  });
+
   test('the current page link gets aria-current="page"; existing marks are kept', async ({ page }) => {
     await open(page, 'nav.html');
     await expect(page.locator('header nav a[aria-current="page"]')).toHaveText('Guide');
